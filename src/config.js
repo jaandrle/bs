@@ -1,4 +1,4 @@
-const { readFileSync, readdirSync, statSync }= require("node:fs");
+const { readFileSync, readdirSync, existsSync, statSync }= require("node:fs");
 /**
  * @typedef Command
  * @type {{
@@ -14,6 +14,8 @@ const { readFileSync, readdirSync, statSync }= require("node:fs");
  * }}
  * */
 module.exports= function(folder){
+	if(!existsSync(folder)) return { commands: {} };
+	
 	const commands= listTOML(folder).map(readTOML)
 		.reduce(function(out, [ cmd, { help= "", completions= {} } ]){
 			const { ['--options']: options, ...commands }= completions;
@@ -31,7 +33,7 @@ function readTOML(path){
 	const pre= readFileSync(path).toString().split("\n")
 		.reduce(function(out, line){
 			line= line.trim();
-			if(!line) return out;
+			if(!line || line.startsWith("#")) return out;
 			if(line.startsWith('[')){
 				out.push([ line.slice(1, line.length - 1), {} ]);
 				return out;

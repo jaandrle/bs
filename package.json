@@ -1,16 +1,20 @@
 {
 	"name": "bs",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "The simplest possible build system using executable/bash scripts",
 	"bin": "bs.js",
 	"main": "bs.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "bs/build"
 	},
 	"keywords": [
 		"build-system",
 		"bash",
 		"cli"
+	],
+	"files": [
+		"src",
+		"bs.js"
 	],
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",

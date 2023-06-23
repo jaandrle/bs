@@ -47,9 +47,11 @@ function passBuildArgs(){
 	return argv.map(l=> l==="--help" || l==="--version" ? "--$$$" : l);
 }
 
-const { accessSync, readdirSync, statSync, constants }= require("node:fs");
+const { accessSync, readdirSync, statSync, existsSync, constants }= require("node:fs");
 function listExecutables(dir, level){
 	const out= [];
+	if(!existsSync(dir)) return out;
+	
 	for(const file of readdirSync(dir)){
 		const file_path= dir + '/' + file;
 		const stats= statSync(file_path);

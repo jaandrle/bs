@@ -45,8 +45,6 @@ const api= require("sade")(name)
 	].map(linesToMaxLength(65)))
 .command(".run [script]", "Run the given build executable", { default: true })
 	.action(run)
-.command(".test")
-	.action(()=> log(config))
 .command(".ls", "Lists all available executables")
 	.action(()=> ls().forEach(lsPrint))
 .command(".completion <shell>", [ "Register a completions for the given shell",
@@ -69,7 +67,7 @@ function ls(){
 }
 function lsPrint(file){
 	const c= config.commands[file];
-	let out= fc(file);
+	let out= "> "+fc(file);
 	if(c && c.help)
 		out+= "\t"+format("%c"+c.help, css.help);
 	log(out);
@@ -79,6 +77,7 @@ function run(script){
 	if(args[0]===".run") args.shift();
 	if(!script) script= "default";
 	else args.shift();
+	const head= lsPrint.bind(null, script);
 	script= folder_root+"/"+script;
 	if(!existsSync(script) || !statSync(script).isFile()){
 		const candidate= listExecutables(script.slice(0, script.lastIndexOf("/")), 0)
@@ -91,6 +90,7 @@ function run(script){
 		return process.exit(1);
 	}
 	
+	head();
 	const { spawnSync }= require("child_process");
 	const out= spawnSync(script, args, { stdio: "inherit", windowsHide: true });
 	if(out.status!==null)
