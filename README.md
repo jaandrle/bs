@@ -1,3 +1,4 @@
+[**WIP**](#wip)
 # bs: Build system based on executables
 This is just an extension (backwards compatible) of [labaneilers/bs: The simplest possible build system using bash](https://github.com/labaneilers/bs).
 
@@ -32,6 +33,13 @@ Some shellbangs for example:
 
 ## Why?
 See [labaneilers/bs#why](https://github.com/labaneilers/bs#why).
+
+## WIP
+- [ ] provide `bs` binary
+- [ ] some missing? commands in `bs` (maybe `.init`)
+- [ ] docs for `.command.toml`
+- [ ] docs for git submodules to share build scripts
+- [ ] examples how to use bash for parallel/serial execution
 
 ## Acknowledgments
 - [labaneilers/bs: The simplest possible build system using bash](https://github.com/labaneilers/bs)
