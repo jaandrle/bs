@@ -32,3 +32,9 @@ Some shellbangs for example:
 
 ## Why?
 See [labaneilers/bs#why](https://github.com/labaneilers/bs#why).
+
+## Acknowledgments
+- [labaneilers/bs: The simplest possible build system using bash](https://github.com/labaneilers/bs)
+- [github-action-publish-binaries · Actions · GitHub Marketplace](https://github.com/marketplace/actions/github-action-publish-binaries)
+- [rgrannell1/rs: A simple build-system](https://github.com/rgrannell1/rs)
+- [jaandrle/nodejsscript: A tool for writing better scripts](https://github.com/jaandrle/nodejsscript)

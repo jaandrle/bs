@@ -1,10 +1,4 @@
 #!/usr/bin/env node
-/*
- * https://github.com/labaneilers/bs/blob/master/bs
- * https://github.com/marketplace/actions/github-action-publish-binaries
- * https://github.com/rgrannell1/rs
- * https://github.com/jaandrle/nodejsscript/blob/dev-v1/bin/completion.mjs
- * */
 const // global functions/utils
 	{ log, format }= require("css-in-console"),
 	{ readFileSync, existsSync, statSync }= require("node:fs"),
