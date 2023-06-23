@@ -37,7 +37,7 @@ const api= require("sade")(name)
 		"",
 		"To point out:",
 		`1. To prevent colision all ${fc(name)} commands starts with ${fc`.`}c (e.g. ${fc`.ls`})`,
-		`2. Similar logic is used for special files/folder (e.g. ${fc`.temp/`}?)`,
+		`2. Similar logic is used for special files/folder (e.g. ${fc`.command.toml`}?)`,
 		"",
 		"Notes:",
 		`[1] use ${fc`chmod +x`} and shebang² like ${fc`#!/usr/bin/env node`} (similarly for bash, …)`,

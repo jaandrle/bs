@@ -37,8 +37,9 @@ See [labaneilers/bs#why](https://github.com/labaneilers/bs#why).
 ## WIP
 - [ ] provide `bs` binary
 - [ ] some missing? commands in `bs` (maybe `.init`)
-- [ ] docs for `.command.toml`
+- [ ] docs for `.command.toml` (`bs` completion)
 - [ ] docs for git submodules to share build scripts
+- [ ] docs for coexistence with others (such as `npm run`)
 - [ ] examples how to use bash for parallel/serial execution
 
 ## Acknowledgments
