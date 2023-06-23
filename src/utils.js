@@ -48,7 +48,6 @@ function passBuildArgs(){
 }
 
 const { accessSync, readdirSync, statSync, constants }= require("node:fs");
-/** @exports */
 function listExecutables(dir, level){
 	const out= [];
 	for(const file of readdirSync(dir)){
@@ -62,7 +61,6 @@ function listExecutables(dir, level){
 	}
 	return out;
 }
-/** @exports */
 function isExecutable(path){
 	try{
 		accessSync(path, constants.X_OK);

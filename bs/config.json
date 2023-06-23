@@ -1,9 +1,0 @@
-{
-	"bs": {
-		"commands": {
-			"build": {
-				"help": "Package nodejs into `dist`"
-			}
-		}
-	}
-}

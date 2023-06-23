@@ -7,7 +7,6 @@ const // global functions/utils
 	  listExecutables, isExecutable }= require("./src/utils.js");
 const // global consts
 	folder_root= "bs", // allow change?
-	file_config= "config.json", // allow change?
 	css= log.css`
 		.error { color: lightred; }
 		.code { color: blue; }
@@ -16,7 +15,7 @@ const // global consts
 		.help { color: magenta; }
 	`,
 	{ version, name }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json"),
-	config= require("./src/config.js")("./package.json", "./"+folder_root+"/"+file_config);
+	config= require("./src/config.js")(folder_root);
 
 const fc= (code, ...rest)=> format("%c"+( !Array.isArray(code) ? code : String.raw(code, ...rest) ), css.code); //format as code
 const api= require("sade")(name)
@@ -46,6 +45,8 @@ const api= require("sade")(name)
 	].map(linesToMaxLength(65)))
 .command(".run [script]", "Run the given build executable", { default: true })
 	.action(run)
+.command(".test")
+	.action(()=> log(config))
 .command(".ls", "Lists all available executables")
 	.action(()=> ls().forEach(lsPrint))
 .command(".completion <shell>", [ "Register a completions for the given shell",
@@ -68,16 +69,16 @@ function ls(){
 }
 function lsPrint(file){
 	const c= config.commands[file];
-	log(fc(file));
+	let out= fc(file);
 	if(c && c.help)
-		log("%c"+c.help, css.help)
+		out+= "\t"+format("%c"+c.help, css.help);
+	log(out);
 }
 function run(script){
 	const args= process.argv.slice(2);
 	if(args[0]===".run") args.shift();
 	if(!script) script= "default";
 	else args.shift();
-	script= findAlias(config, script);
 	script= folder_root+"/"+script;
 	if(!existsSync(script) || !statSync(script).isFile()){
 		const candidate= listExecutables(script.slice(0, script.lastIndexOf("/")), 0)
@@ -97,12 +98,6 @@ function run(script){
 	log("%cUnknown error", css.error);
 	console.error(out);
 	process.exit(1);
-	
-	function findAlias(config, script){
-		const candidate= Object.entries(config.commands)
-			.find(([ alias, { cmd } ])=> typeof cmd !== "undefined" && alias===script);
-		return candidate ? candidate[1].cmd : script;
-	}
 }
 function completion(shell){
 	const { completionBash, completionRegisterBash }= require("./src/completion.js");

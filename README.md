@@ -25,7 +25,7 @@ Some shellbangs for example:
 ## Usage
 - raw:
 	- Run command: `bs/build.js some-argument`
-	- Lists commands: `find bs -type f -executable`
+	- Lists commands: `find bs -type f -executable` (list help texts `grep -H help bs/.*.toml bs/*/.*.toml`, see below)
 - using `bs`:
 	- Run command: `bs build some-argument`
 	- Lists commands: `bs .ls`

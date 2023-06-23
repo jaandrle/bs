@@ -26,13 +26,10 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second ]
 	}
 	if(first.startsWith("."))
 		return resolve(options_global);
-	if(
-		!Object.hasOwn(config.commands, first) ||
-		!Object.hasOwn(config.commands[first], "completions")
-	)
+	if(!Object.hasOwn(config.commands, first))
 		process.exit(0);
 	
-	const { commands= {}, options= [] }= config.commands[first].completions;
+	const { commands= {}, options= [] }= config.commands[first];
 	if(level===1)
 		return resolve([ ...Object.keys(commands), ...options ]);
 	if(commands[prev])
