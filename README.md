@@ -19,6 +19,7 @@ Some shellbangs for example:
 ```
 #!/usr/bin/env node
 #!/usr/bin/env nodejsscript
+#!/usr/bin/env -S npx nodejsscript
 #!/usr/bin/env python3
 #!/usr/bin/env bash
 ```
