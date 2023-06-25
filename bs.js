@@ -102,9 +102,8 @@ function run(script){
 	
 	head();
 	const { spawn }= require("node:child_process");
-	const ch= spawn(script, args, { stdio: "inherit" })
+	return spawn(script, args, { stdio: "inherit" })
 		.on("exit", function onexit(exit_code, signal){
-			log(ch);
 			if(typeof exit_code === 'number')
 				return process.exit(exit_code);
 			
