@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -eou pipefail
+echo "sleep $1 strats"
+sleep "$1"
+echo "sleep $1 ends"

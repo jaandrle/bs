@@ -1,6 +1,6 @@
 {
 	"name": "bs",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "The simplest possible build system using executable/bash scripts",
 	"bin": "bs.js",
 	"main": "bs.js",

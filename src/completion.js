@@ -11,7 +11,7 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second ]
 	}
 	const resolve= arr=> { log(matches(arr)); return process.exit(0); };
 	const options_global= api.tree.__all__.options.map(r=> r[0]).concat("--help", "--version");
-	const lsAll= ()=> ls().concat(...Object.keys(config.commands));
+	const lsAll= ()=> ls().concat(...Object.keys(config.executables));
 	if(!level) return pipe(
 		()=> Object.keys(api.tree).filter(c=> !c.startsWith("__")),
 		arr=> arr.concat(...options_global),
@@ -26,10 +26,10 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second ]
 	}
 	if(first.startsWith("."))
 		return resolve(options_global);
-	if(!Object.hasOwn(config.commands, first))
+	if(!Object.hasOwn(config.executables, first))
 		process.exit(0);
 	
-	const { commands= {}, options= [] }= config.commands[first];
+	const { commands= {}, options= [] }= config.executables[first];
 	if(level===1)
 		return resolve([ ...Object.keys(commands), ...options ]);
 	if(commands[prev])

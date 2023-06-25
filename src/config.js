@@ -10,22 +10,21 @@ const { readFileSync, readdirSync, existsSync, statSync }= require("node:fs");
 /**
  * @param {...string} candidates
  * @returns {{
- *	commands: Record<string, Command>
+ *	executables: Record<string, Command>
  * }}
  * */
 module.exports= function(folder){
-	if(!existsSync(folder)) return { commands: {} };
+	if(!existsSync(folder)) return { executables: {} };
 	
-	const commands= listTOML(folder).map(readTOML)
-		.reduce(function(out, [ cmd, { help= "", completions= {} } ]){
+	const executables= listTOML(folder).map(readTOML)
+		.reduce(function(out, [ cmd, { completions= {}, ...curr } ]){
 			const { ['--options']: options, ...commands }= completions;
-			const curr= { help };
 			curr.options= options ? options : [];
 			curr.commands= commands ? commands : {};
 			out[cmd]= curr;
 			return out;
 		}, {});
-	return { commands };
+	return { executables };
 };
 
 function readTOML(path){

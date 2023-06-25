@@ -32,7 +32,7 @@ const api= require("sade")(name)
 		"",
 		"So, this script is not neccessary, but it provides some helpers:",
 		`1. You can call executables without extensions (for example ${fc`bs/test`} ⇔ ${fc`bs test`})`,
-		`2. You can call ${fc`default`} easier (for example ${fc`bs/default.sh`} ⇔ ${fc`bs`}) – if defined`,
+		`2. You can define default executable`,
 		`3. You can use completion, see ${fc`.completion`} command`,
 		"",
 		"To point out:",
@@ -48,6 +48,10 @@ const api= require("sade")(name)
 .command(".ls", "Lists all available executables")
 	.action(()=> ls().forEach(lsPrint))
 .command(".completion <shell>", [ "Register a completions for the given shell",
+	`This provides completions for ${fc`bs`} itself and available executables`,
+	"and argumnets for executables if specify in corresponding config file.",
+	"",
+	"To allow completions:",
 	`Just add ${fc`eval "$(${name} .completion bash)"`} to your ${fc`.bashrc`}` ])
 	.action(completion);
 api.parse(passBuildArgs());
@@ -66,7 +70,7 @@ function ls(){
 	});
 }
 function lsPrint(file){
-	const c= config.commands[file];
+	const c= config.executables[file];
 	let out= "> "+fc(file);
 	if(c && c.help)
 		out+= "\t"+format("%c"+c.help, css.help);
@@ -74,8 +78,14 @@ function lsPrint(file){
 }
 function run(script){
 	const args= process.argv.slice(2);
+	
 	if(args[0]===".run") args.shift();
-	if(!script) script= "default";
+	if(!args.length){
+		const is_default= Object.entries(config.executables).find(([_, c])=> c.default);
+		if(!is_default)
+			return ls().forEach(lsPrint);
+		script= is_default[0];
+	}
 	else args.shift();
 	const head= lsPrint.bind(null, script);
 	script= folder_root+"/"+script;
@@ -91,13 +101,16 @@ function run(script){
 	}
 	
 	head();
-	const { spawnSync }= require("child_process");
-	const out= spawnSync(script, args, { stdio: "inherit", windowsHide: true });
-	if(out.status!==null)
-		return process.exit(out.status);
-	log("%cUnknown error", css.error);
-	console.error(out);
-	process.exit(1);
+	const { spawn }= require("node:child_process");
+	const ch= spawn(script, args, { stdio: "inherit" })
+		.on("exit", function onexit(exit_code, signal){
+			log(ch);
+			if(typeof exit_code === 'number')
+				return process.exit(exit_code);
+			
+			log("%cUnknown error", css.error);
+			process.kill(process.pid, signal)
+		});
 }
 function completion(shell){
 	const { completionBash, completionRegisterBash }= require("./src/completion.js");
