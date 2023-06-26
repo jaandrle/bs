@@ -15,8 +15,7 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: bs/build dist
-    - uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: AButler/upload-release-assets@072dc74f9dae356bd7c45a0d0e998ca6d9854e01 # v2.0
       with:
-        args: 'dist/*'
+        files: 'dist/*'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
