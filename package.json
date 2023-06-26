@@ -2,6 +2,16 @@
 	"name": "bs",
 	"version": "0.7.0",
 	"description": "The simplest possible build system using executable/bash scripts",
+	"author": "Jan Andrle <andrle.jan@centrum.cz>",
+	"license": "MIT",
+	"homepage": "https://github.com/jaandrle/bs",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jaandrle/bs.git"
+	},
+	"bugs": {
+		"url": "https://github.com/jaandrle/bs/issues"
+	},
 	"bin": {
 		"bs": "bs.js"
 	},
@@ -18,8 +28,6 @@
 	"files": [
 		"src"
 	],
-	"author": "Jan Andrle <andrle.jan@centrum.cz>",
-	"license": "MIT",
 	"devDependencies": {
 		"pkg": "^5.8.1"
 	},
