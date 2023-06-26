@@ -72,7 +72,7 @@ and make some operations easier.
 ### Installation
 *For now for early adapaters.*
 
-You can find binaries on [Release](../releases/latest) page.
+You can find binaries on [Release](https://github.com/jaandrle/bs/releases/latest) page.
 
 Or use: `npm install https://github.com/jaandrle/bs --location=global`
 
