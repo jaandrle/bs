@@ -18,8 +18,8 @@ module.exports= function(folder){
 	
 	const executables= listTOML(folder).map(readTOML)
 		.reduce(function(out, [ cmd, { completions= {}, ...curr } ]){
-			const { ['--options']: options, ...commands }= completions;
-			curr.options= options ? options : [];
+			const { __all, ...commands }= completions;
+			curr.__all= __all ? __all : [];
 			curr.commands= commands ? commands : {};
 			out[cmd]= curr;
 			return out;

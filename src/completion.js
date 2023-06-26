@@ -1,6 +1,6 @@
 const { pipe }= require("./utils.js");
 const log= console.log.bind(console);
-function completionBash({ api, ls, config }, [ level, now, prev, first, second ]){
+function completionBash({ api, ls, config }, [ level, now, prev, first, second, third ]){
 	level-= 2;
 	const matches= arr=> {
 		let out= arr.filter(item=> item.indexOf(now)===0);
@@ -22,6 +22,7 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second ]
 		if(level===1)
 			return resolve(lsAll().concat(...options_global));
 		first= second;
+		second= third;
 		level-= 1;
 	}
 	if(first.startsWith("."))
@@ -29,18 +30,18 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second ]
 	if(!Object.hasOwn(config.executables, first))
 		process.exit(0);
 	
-	const { commands= {}, options= [] }= config.executables[first];
+	const { commands= {}, __all= [] }= config.executables[first];
 	if(level===1)
-		return resolve([ ...Object.keys(commands), ...options ]);
-	if(commands[prev])
-		return resolve([ ...commands[prev], ...options ]);
+		return resolve([ ...Object.keys(commands), ...__all ]);
+	if(commands[second])
+		return resolve([ ...commands[second], ...__all ]);
 	process.exit(0);
 }
 function completionRegisterBash(name){
 	log([
 		`__${name}_opts()`,
 		"{",
-		` COMPREPLY=( $(${name} .completion bash--complete "\${#COMP_WORDS[@]}" "\${COMP_WORDS[COMP_CWORD]}" "\${COMP_WORDS[COMP_CWORD-1]}" "\${COMP_WORDS[1]}" "\${COMP_WORDS[2]}") )`,
+		` COMPREPLY=( $(${name} .completion bash--complete "\${#COMP_WORDS[@]}" "\${COMP_WORDS[COMP_CWORD]}" "\${COMP_WORDS[COMP_CWORD-1]}" "\${COMP_WORDS[1]}" "\${COMP_WORDS[2]}" "\${COMP_WORDS[3]}") )`,
 		" return 0",
 		"}",
 		`complete -o filenames -F __${name}_opts ${name}`,

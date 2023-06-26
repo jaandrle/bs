@@ -1,5 +1,5 @@
 help= "Test Build"
 
 [completions]
---options= [ "mája", "jede", "na", "kole" ]
-ahoj= [ "ahoj", "honzo" ]
+__all= [ "--help", "--version" ]
+production= [ "--target" ]
