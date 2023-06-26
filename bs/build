@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 # https://github.com/vercel/pkg
 set -eou pipefail
-npx pkg . --out-path dist
+folder=${1:-dist}
+npx pkg . --out-path "$folder"
