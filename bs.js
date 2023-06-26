@@ -31,7 +31,7 @@ const api= require("sade")(name)
 			/* join with "or" */.reverse().map((s, i)=> i ? s+" or" : s).reverse(),
 		"",
 		"So, this script is not neccessary, but it provides some helpers:",
-		`1. You can call executables without extensions (for example ${fc`bs/test`} ⇔ ${fc`bs test`})`,
+		`1. You can call executables without extensions (for example ${fc`bs/test.py`} ⇔ ${fc`bs test`})`,
 		`2. You can define default executable`,
 		`3. You can use completion, see ${fc`.completion`} command`,
 		"",
