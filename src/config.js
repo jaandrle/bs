@@ -29,15 +29,18 @@ module.exports= function(folder){
 
 function readTOML(path){
 	const file_name= path.slice(path.lastIndexOf("/")+2, -".toml".length);
-	const pre= readFileSync(path).toString().split("\n")
+	const pre= readFileSync(path).toString().split(/\n(?=[A-Za-z_]+=|\[)/g)
 		.reduce(function(out, line){
-			line= line.trim();
-			if(!line || line.startsWith("#")) return out;
+			line= line.replace(/#[^"'\r\n]*[\n\r]/g, "").trim().split(/\n/g).filter(line=> !line.trim().startsWith("#")).join("\n");
+			if(!line) return out;
 			if(line.startsWith('[')){
-				out.push([ line.slice(1, line.length - 1), {} ]);
+				const end_bracket= line.indexOf("]");
+				const end_line= line.indexOf("\n") - 2;
+				out.push([ line.slice(1, end_line < 0 ? end_bracket : end_line), {} ]);
 				return out;
 			}
 			const eq= line.indexOf("=");
+			if(eq===-1) throw new Error("Wrong TOML format (`rule= value`): " + line);
 			const key= line.slice(0, eq);
 			const value= line.slice(eq+1).trim();
 			out.at(-1)[1][key]= JSON.parse(value);
