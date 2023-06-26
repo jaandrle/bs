@@ -15,8 +15,7 @@
 		"cli"
 	],
 	"files": [
-		"src",
-		"bs.js"
+		"src"
 	],
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
