@@ -14,9 +14,6 @@
 		"bash",
 		"cli"
 	],
-	"files": [
-		"src"
-	],
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
 	"devDependencies": {
