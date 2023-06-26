@@ -1,4 +1,4 @@
-help= "Test Build #1"
+info= "Test Build #1"
 
 [completions]
 __all= [ "--help", "--version" ]

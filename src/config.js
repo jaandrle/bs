@@ -2,7 +2,7 @@ const { readFileSync, readdirSync, existsSync, statSync }= require("node:fs");
 /**
  * @typedef Command
  * @type {{
- *	help?: string,
+ *	info?: string,
  *	options: string[],
  *	commands: Record<string, string[]>
  * }}

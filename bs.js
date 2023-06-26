@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict";
 const // global functions/utils
 	{ log, format }= require("css-in-console"),
 	{ readFileSync, existsSync, statSync }= require("node:fs"),
@@ -6,15 +7,15 @@ const // global functions/utils
 	  linesToMaxLength, passBuildArgs,
 	  listExecutables, isExecutable }= require("./src/utils.js");
 const // global consts
-	folder_root= "bs", // allow change?
 	css= log.css`
 		.error { color: lightred; }
 		.code { color: blue; }
 		.code::before, .code::after { content: "\`"; }
-		.tab::before, .help::before { content: "	"; }
-		.help { color: magenta; }
+		.tab::before { content: "	"; }
+		.info { color: magenta; }
 	`,
 	{ version, name }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json"),
+	folder_root= findBS(),
 	config= require("./src/config.js")(folder_root);
 
 const fc= (code, ...rest)=> format("%c"+( !Array.isArray(code) ? code : String.raw(code, ...rest) ), css.code); //format as code
@@ -23,7 +24,7 @@ const api= require("sade")(name)
 	.describe([
 		"This script allows you to create build scripts using simple executables¹:",
 		"",
-		`1. Create a ${format("%c./bs", css.code)} directory in your repository root`,
+		`1. Create a ${fc(name)} directory in your repository root`,
 		"2. Implement commands just by adding shell scripts or any other executable (using shellbang¹)",
 		"3. Now, you can run build scrip like:",
 		...[ "bs/build", "./bs/build", "bs build", "bs .run build" ]
@@ -31,9 +32,10 @@ const api= require("sade")(name)
 			/* join with "or" */.reverse().map((s, i)=> i ? s+" or" : s).reverse(),
 		"",
 		"So, this script is not neccessary, but it provides some helpers:",
-		`1. You can call executables without extensions (for example ${fc`bs/test.py`} ⇔ ${fc`bs test`})`,
+		`1. You can call executables without extensions (for example ${fc`${name}/test.py`} ⇔ ${fc`${name} test`})`,
 		`2. You can define default executable`,
 		`3. You can use completion, see ${fc`.completion`} command`,
+		`4. This utility can find current or any parent folder containing ${fc(name)} directory`,
 		"",
 		"To point out:",
 		`1. To prevent colision all ${fc(name)} commands starts with ${fc`.`}c (e.g. ${fc`.ls`})`,
@@ -72,8 +74,8 @@ function ls(){
 function lsPrint(file){
 	const c= config.executables[file];
 	let out= "> "+fc(file);
-	if(c && c.help)
-		out+= "\t"+format("%c"+c.help, css.help);
+	if(c && c.info)
+		out+= "\t"+format("%c"+c.info, css.info+css.tab);
 	log(out);
 }
 function run(script){
@@ -119,4 +121,18 @@ function completion(shell){
 		return completionBash({ api, ls, config }, process.argv.slice(4));
 	log("Unknown shell: "+shell);
 	process.exit(1);
+}
+
+function findBS(cwd= process.cwd()){
+	const folder_root= "/bs"; // allow change?
+	let candidate= cwd.replace(/\/$/, "");
+	while(!existsSync(candidate+folder_root)){
+		const last_slash= candidate.lastIndexOf("/");
+		if(last_slash < 0){
+			log("%cNo `bs` for current directory: %c%s", css.error, css.unset, cwd);
+			return process.exit(1);
+		}
+		candidate= candidate.slice(0, last_slash);
+	}
+	return candidate+folder_root;
 }

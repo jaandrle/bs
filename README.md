@@ -85,7 +85,7 @@ buld.sh
 ```
 ```toml
 #.build.toml
-help= "Description of command"
+info= "Description of command"
 default= true
 
 [completions]
@@ -93,7 +93,7 @@ __all= [ "--help", "--version" ]
 cmd= []
 ```
 …all is optional. But:
-- `help`: this text is listed aside of command name (e.g. `bs .ls`)
+- `info`: this text is listed aside of command name (e.g. `bs .ls`)
 - `default`: this changes behavior of plain `bs`. By default it runs `.ls`, now it runs marked command
 - `completions`: provide options for completions `bs .run build …`/`bs build …`
 	- `__all`: these options are listed for all sub-commands
