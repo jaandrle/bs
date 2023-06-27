@@ -90,7 +90,8 @@ function run(script){
 	}
 	else args.shift();
 	const head= lsPrint.bind(null, script);
-	script= folder_root+"/"+script;
+	process.chdir(folder_root.replace(/\/bs$/, ""));
+	script= "bs"+"/"+script;
 	if(!existsSync(script) || !statSync(script).isFile()){
 		const candidate= listExecutables(script.slice(0, script.lastIndexOf("/")), 0)
 			.find(f=> f.startsWith(script) && f[script.length]===".");

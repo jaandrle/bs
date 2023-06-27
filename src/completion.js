@@ -11,16 +11,15 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second, 
 	}
 	const resolve= arr=> { log(matches(arr)); return process.exit(0); };
 	const options_global= api.tree.__all__.options.map(r=> r[0]).concat("--help", "--version");
-	const lsAll= ()=> ls().concat(...Object.keys(config.executables));
 	if(!level) return pipe(
 		()=> Object.keys(api.tree).filter(c=> !c.startsWith("__")),
 		arr=> arr.concat(...options_global),
-		arr=> arr.concat(...lsAll()),
+		arr=> arr.concat(...ls()),
 		resolve
 	)();
 	if(first===".run"){
 		if(level===1)
-			return resolve(lsAll().concat(...options_global));
+			return resolve(ls().concat(...options_global));
 		first= second;
 		second= third;
 		level-= 1;

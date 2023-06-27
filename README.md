@@ -28,8 +28,11 @@ Some shellbangs for example:
 See [labaneilers/bs#why](https://github.com/labaneilers/bs#why).
 
 ## Usage
-Are you looking for a way to quickly and easily run commands
-and list available commands?
+Your working directory should contain `bs` directory with building
+scrips/executables. You can use [`bs`](#bs) utility with auto-find
+feature.
+
+Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
 	- Lists commands: `find bs -type f -executable`
@@ -65,6 +68,14 @@ bs/taskC
 set -eou pipefail
 cat src/*.js | manipulate > index.js
 ```
+
+You can create alias for task with:
+```bash
+ln -rfs bs/target bs/alias
+# optionaly
+ln -rfs bs/.target.toml bs/.alias.toml
+```
+
 ## `bs`
 This is just a simple helper providing nice outputs
 and make some operations easier.
