@@ -1,4 +1,3 @@
-[**WIP**](#wip)
 # bs: Build system based on executables
 This is just an extension (backwards compatible) of [labaneilers/bs: The simplest possible build system using bash](https://github.com/labaneilers/bs).
 
