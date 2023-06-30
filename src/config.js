@@ -14,7 +14,8 @@ const { readFileSync, readdirSync, existsSync, statSync }= require("node:fs");
  * }}
  * */
 module.exports= function(folder){
-	if(!existsSync(folder)) return { executables: {} };
+	if(!folder || !existsSync(folder))
+		return { executables: {} };
 	
 	const executables= listTOML(folder).map(readTOML)
 		.reduce(function(out, [ cmd, { completions= {}, ...curr } ]){

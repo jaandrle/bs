@@ -6,6 +6,8 @@ const // global functions/utils
 	{ pipe,
 	  linesToMaxLength, passBuildArgs,
 	  listExecutables, isExecutable }= require("./src/utils.js");
+/** @type {()=> void} */
+let error;
 const // global consts
 	css= log.css`
 		.error { color: lightred; }
@@ -19,6 +21,7 @@ const // global consts
 	config= require("./src/config.js")(folder_root);
 
 const fc= (code, ...rest)=> format("%c"+( !Array.isArray(code) ? code : String.raw(code, ...rest) ), css.code); //format as code
+const catchError= a=> { if(!error) return a; error(a); };
 const api= require("sade")(name)
 	.version(version)
 	.describe([
@@ -48,7 +51,7 @@ const api= require("sade")(name)
 .command(".run [script]", "Run the given build executable", { default: true })
 	.action(run)
 .command(".ls", "Lists all available executables")
-	.action(()=> ls().forEach(lsPrint))
+	.action(()=> ls().forEach(lsPrintNth))
 .command(".completion <shell>", [ "Register a completions for the given shell",
 	`This provides completions for ${fc`bs`} itself and available executables`,
 	"and argumnets for executables if specify in corresponding config file.",
@@ -59,6 +62,8 @@ const api= require("sade")(name)
 api.parse(passBuildArgs());
 
 function ls(){
+	if(!folder_root) return [];
+
 	return listExecutables(folder_root, 0)
 	 .map(pipe(
 		f=> f.slice(folder_root.length+1),
@@ -71,7 +76,7 @@ function ls(){
 		return a.localeCompare(b);
 	});
 }
-function lsPrint(file){
+function lsPrintNth(file){
 	const c= config.executables[file];
 	let out= "> "+fc(file);
 	if(c && c.info)
@@ -84,12 +89,12 @@ function run(script){
 	if(args[0]===".run") args.shift();
 	if(!args.length){
 		const is_default= Object.entries(config.executables).find(([_, c])=> c.default);
-		if(!is_default)
-			return ls().forEach(lsPrint);
+		if(!is_default) return runFallback();
 		script= is_default[0];
 	}
 	else args.shift();
-	const head= lsPrint.bind(null, script);
+	catchError();
+	const head= lsPrintNth.bind(null, script);
 	process.chdir(folder_root.replace(/\/bs$/, ""));
 	script= "bs"+"/"+script;
 	if(!existsSync(script) || !statSync(script).isFile()){
@@ -114,6 +119,15 @@ function run(script){
 			process.kill(process.pid, signal)
 		});
 }
+function runFallback(){
+	const list= ls();
+	if(list.length)
+		return list.forEach(lsPrintNth);
+	
+	log(`%c${name}@v${version}`, css.info);
+	log(`Run %c$ ${name} --help%c for more info.`, css.code, css.unset);
+	return process.exit(0);
+}
 function completion(shell){
 	const { completionBash, completionRegisterBash }= require("./src/completion.js");
 	if("bash"===shell)
@@ -130,8 +144,11 @@ function findBS(cwd= process.cwd()){
 	while(!existsSync(candidate+folder_root)){
 		const last_slash= candidate.lastIndexOf("/");
 		if(last_slash < 0){
-			log("%cNo `bs` for current directory: %c%s", css.error, css.unset, cwd);
-			return process.exit(1);
+			error= ()=> {
+				log("%cNo `bs` for current directory: %c%s", css.error, css.unset, cwd);
+				return process.exit(1);
+			};
+			return null;
 		}
 		candidate= candidate.slice(0, last_slash);
 	}
