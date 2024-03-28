@@ -50,7 +50,7 @@ function completionRegisterBash(name){
 		" fi",
 		" return 0",
 		"}",
-		`complete -o filenames -F __${name}_opts ${name}`,
+		`complete -F __${name}_opts ${name}`,
 	].join("\n"));
 	process.exit(0);
 }
