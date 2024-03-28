@@ -1,6 +1,6 @@
 {
 	"name": "bs",
-	"version": "0.7.3",
+	"version": "0.7.4",
 	"description": "The simplest possible build system using executable/bash scripts",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
