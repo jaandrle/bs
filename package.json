@@ -29,14 +29,14 @@
 		"src"
 	],
 	"devDependencies": {
-		"pkg": "^5.8.1"
+		"pkg": "~5.8"
 	},
 	"dependencies": {
-		"css-in-console": "github:jaandrle/css-in-console#dev-v2",
-		"sade": "^1.8.1"
+		"css-in-console": "~2.0",
+		"sade": "~1.8"
 	},
 	"engines": {
-		"node": ">= 18.0.0"
+		"node": "= 18.19.0"
 	},
 	"pkg": {
 		"assets": "./package.json"
