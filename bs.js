@@ -2,29 +2,34 @@
 "use strict";
 const // global functions/utils
 	{ log, format }= require("css-in-console"),
-	{ readFileSync, existsSync, statSync }= require("node:fs"),
+	{ readFileSync, existsSync, mkdirSync, writeFileSync, statSync }= require("node:fs"),
+	{ join }= require("node:path"),
 	{ pipe,
 	  linesToMaxLength, passBuildArgs,
-	  listExecutables, isExecutable }= require("./src/utils.js");
+	  listExecutables, isExecutable }= require("./src/utils.js"),
+	{ cwd: pwd }= require("node:process");
 /** @type {()=> void} */
 let error;
 const // global consts
+	headline= "bs: Build system based on executables",
 	css= log.css`
 		.error { color: lightred; }
 		.code { color: blue; }
 		.code::before, .code::after { content: "\`"; }
 		.tab::before { content: "	"; }
-		.info { color: magenta; }
+		.info {}
 	`,
-	{ version, name }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json"),
-	folder_root= findBS(),
-	config= require("./src/config.js")(folder_root);
+	{ version, name, homepage, description }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json");
+let // bs folder
+	folder_root, config;
 
 const fc= (code, ...rest)=> format("%c"+( !Array.isArray(code) ? code : String.raw(code, ...rest) ), css.code); //format as code
 const catchError= a=> { if(!error) return a; error(a); };
 const api= require("sade")(name)
 	.version(version)
 	.describe([
+		headline,
+		"",
 		"This script allows you to create build scripts using simple executables¹:",
 		"",
 		`1. Create a ${fc(name)} directory in your repository root`,
@@ -44,6 +49,9 @@ const api= require("sade")(name)
 		`1. To prevent colision all ${fc(name)} commands starts with ${fc`.`}c (e.g. ${fc`.ls`})`,
 		`2. Similar logic is used for special files/folder (e.g. ${fc`.command.toml`}?)`,
 		"",
+		"Known pitfalls:",
+		`1. The ${fc(name)} tries to find root folder and uses it as cwd, so ${fc`${name} command ./file`} can works unexpectedly!`,
+		"",
 		"Notes:",
 		`[1] use ${fc`chmod +x`} and shebang² like ${fc`#!/usr/bin/env node`} (similarly for bash, …)`,
 		"[2] https://en.wikipedia.org/wiki/Shebang_(Unix)"
@@ -51,7 +59,10 @@ const api= require("sade")(name)
 .command(".run [script]", "Run the given build executable", { default: true })
 	.action(run)
 .command(".ls", "Lists all available executables")
-	.action(()=> ls().forEach(lsPrintNth))
+	.action(()=> ( ls().forEach(lsPrintNth), process.exit(0) ))
+.command(".init [root]", [ "This initializes the projects bs directory",
+	`With ${fc`root`} folder defaults to ${fc`.`}.` ])
+	.action(init)
 .command(".completion <shell>", [ "Register a completions for the given shell",
 	`This provides completions for ${fc`bs`} itself and available executables`,
 	"and argumnets for executables if specify in corresponding config file.",
@@ -61,7 +72,24 @@ const api= require("sade")(name)
 	.action(completion);
 api.parse(passBuildArgs());
 
+function init(root= pwd()){
+	const folder_root= join(root, name);
+	if(!existsSync(folder_root)) mkdirSync(folder_root);
+	console.log("Folder: "+folder_root);
+	console.log("Executables: "+ls().join(", "));
+	const readme= join(folder_root, "README.md");
+	if(!existsSync(readme)){
+		const link= `[${homepage.slice("https://github.com/".length)}: ${description}](${homepage})`;
+		writeFileSync(readme, [
+			"# "+headline,
+			`This project uses ${link}.`,
+		].join("\n"));
+	}
+	console.log("Readme: "+readme);
+	process.exit(0);
+}
 function ls(){
+	loadBS();
 	if(!folder_root) return [];
 
 	return listExecutables(folder_root, 0)
@@ -79,11 +107,15 @@ function ls(){
 function lsPrintNth(file){
 	const c= config.executables[file];
 	let out= "> "+fc(file);
-	if(c && c.info)
-		out+= "\t"+format("%c"+c.info, css.info+css.tab);
+	if(c)
+		if(c.default)
+			out+= " (default)";
+		if(c.info)
+			out+= ": "+format("%c"+c.info, css.info);
 	log(out);
 }
 function run(script){
+	loadBS();
 	const args= process.argv.slice(2);
 	
 	if(args[0]===".run") args.shift();
@@ -95,8 +127,9 @@ function run(script){
 	else args.shift();
 	catchError();
 	const head= lsPrintNth.bind(null, script);
+	// TODO: what about `./` in args when cwd≠folder_root/..
 	process.chdir(folder_root.replace(/\/bs$/, ""));
-	script= "bs"+"/"+script;
+	script= "bs/"+script;
 	if(!existsSync(script) || !statSync(script).isFile()){
 		const candidate= listExecutables(script.slice(0, script.lastIndexOf("/")), 0)
 			.find(f=> f.startsWith(script) && f[script.length]===".");
@@ -138,7 +171,11 @@ function completion(shell){
 	process.exit(1);
 }
 
-function findBS(cwd= process.cwd()){
+function loadBS(){
+	if(!folder_root) folder_root= findBS();
+	if(!config) config= require("./src/config.js")(folder_root);
+}
+function findBS(cwd= pwd()){
 	const folder_root= "/bs"; // allow change?
 	let candidate= cwd.replace(/\/$/, "");
 	while(!existsSync(candidate+folder_root)){

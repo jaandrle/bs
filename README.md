@@ -110,7 +110,7 @@ cmd= []
 	- `cmd`: registers sub-command and its possible arguments (`bs .run build cmd …`)
 
 ### `bs` synopsis
-See [bs.js (line ≥24)](./bs.js#L24).
+See [bs.js (line ≥31)](./bs.js#L31).
 
 ### `bs` completions
 To allow completions just add `eval "$(bs .completion bash)"` to your `.bashrc`.
