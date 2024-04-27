@@ -32,7 +32,7 @@
 		"pkg": "~5.8"
 	},
 	"dependencies": {
-		"css-in-console": "~2.0",
+		"css-in-console": "~1.1",
 		"sade": "~1.8"
 	},
 	"engines": {

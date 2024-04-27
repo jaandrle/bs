@@ -34,11 +34,11 @@ feature.
 Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
-	- Lists commands: `find bs -type f -executable`
-	(list help texts `grep -H help bs/.*.toml bs/*/.*.toml`, see below)
+	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
+	- (optional, [see below](#config-info-files)) list info texts: `grep -H info bs/.*.toml`, `grep -HR info bs --include=.*.toml`
 - using `bs`:
 	- Run command: `bs build some-argument`
-	- Lists commands: `bs .ls`
+	- Lists commands (with [info texts](#config-info-files)): `bs .ls`
 
 Now focus on creating building flows. For parallel tasts, you can
 use this pattern:
@@ -120,7 +120,7 @@ You can use [Git - Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodul
 
 ## WIP
 - [x] provide `bs` binary
-- [ ] some missing? commands in `bs` (maybe `.init`)
+- [x] some missing? commands in `bs` (maybe `.init`)
 - [x] docs for `.command.toml` (`bs` completion)
 - [x] docs for git submodules to share build scripts
 - [ ] docs for coexistence with others (such as `npm run`)
