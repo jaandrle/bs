@@ -18,10 +18,11 @@ const // global consts
 		.code::before, .code::after { content: "\`"; }
 		.tab::before { content: "	"; }
 		.info {}
+		.headline { color: magenta; }
 	`,
 	{ version, name, homepage, description }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json");
 let // bs folder
-	folder_root, config;
+	folder_root;
 
 const fc= (code, ...rest)=> format("%c"+( !Array.isArray(code) ? code : String.raw(code, ...rest) ), css.code); //format as code
 const catchError= a=> { if(!error) return a; error(a); };
@@ -41,13 +42,12 @@ const api= require("sade")(name)
 		"",
 		"So, this script is not neccessary, but it provides some helpers:",
 		`1. You can call executables without extensions (for example ${fc`${name}/test.py`} ⇔ ${fc`${name} test`})`,
-		`2. You can define default executable`,
-		`3. You can use completion, see ${fc`.completion`} command`,
-		`4. This utility can find current or any parent folder containing ${fc(name)} directory`,
+		`2. You can use completion, see ${fc`.completion`} command`,
+		`3. This utility can find current or any parent folder containing ${fc(name)} directory`,
 		"",
 		"To point out:",
 		`1. To prevent colision all ${fc(name)} commands starts with ${fc`.`}c (e.g. ${fc`.ls`})`,
-		`2. Similar logic is used for special files/folder (e.g. ${fc`.command.toml`}?)`,
+		`2. It is a good practice to distinc non-commands from commands (eg. with preposition ${fc`.`}, ${fc`_`}, …)`,
 		"",
 		"Known pitfalls:",
 		`1. The ${fc(name)} tries to find root folder and uses it as cwd, so ${fc`${name} command ./file`} can works unexpectedly!`,
@@ -63,6 +63,10 @@ const api= require("sade")(name)
 .command(".init [root]", [ "This initializes the projects bs directory",
 	`With ${fc`root`} folder defaults to ${fc`.`}.` ])
 	.action(init)
+.command(".readme", "This is primarly used for update current README.md content.")
+	.action(init)
+.command(".cat", "This prints README.md content")
+	.action(cat)
 .command(".completion <shell>", [ "Register a completions for the given shell",
 	`This provides completions for ${fc`bs`} itself and available executables`,
 	"and argumnets for executables if specify in corresponding config file.",
@@ -73,19 +77,48 @@ const api= require("sade")(name)
 api.parse(passBuildArgs());
 
 function init(root= pwd()){
-	const folder_root= join(root, name);
-	if(!existsSync(folder_root)) mkdirSync(folder_root);
-	console.log("Folder: "+folder_root);
-	console.log("Executables: "+ls().join(", "));
-	const readme= join(folder_root, "README.md");
-	if(!existsSync(readme)){
-		const link= `[${homepage.slice("https://github.com/".length)}: ${description}](${homepage})`;
-		writeFileSync(readme, [
-			"# "+headline,
-			`This project uses ${link}.`,
-		].join("\n"));
-	}
+	const is_init= process.argv.slice(2)[0]===".init";
+	const folder_root_local= is_init ? join(root, name) : ( loadBS(), folder_root );
+	if(!existsSync(folder_root_local)) mkdirSync(folder_root_local);
+	console.log("Folder: "+folder_root_local);
+	const execs= listExecutables(folder_root_local, 0).map(e=> e.replace(folder_root_local+"/", ""));
+	console.log("Executables: "+execs.join(", "));
+	const readme= join(folder_root_local, "README.md");
+	const readme_content= existsSync(readme) ? readFileSync(readme, "utf8").split("\n") : [
+		"# "+headline,
+		`This project uses [${homepage.slice("https://github.com/".length)}: ${description}](${homepage}).`,
+		"",
+		"## Available executables",
+		"",
+	];
+	const execs_known= readme_content.flatMap((line, i)=> line.match(/^### bs\/(.*)/) ? [ readme_content[i] ] : []);
+	const execs_add= execs
+		.map(e=> `### bs/${e}`)
+		.filter(e=> !execs_known.includes(e));
+	writeFileSync(readme, readme_content.join("\n"));
+	if(execs_add.length)
+		console.log("Missing in README: \n```markdown\n"+execs_add.join("\n")+"\n```");
 	console.log("Readme: "+readme);
+	process.exit(0);
+}
+function cat(){
+	loadBS();
+	if(!folder_root){
+		log("%cNo `bs` directory found", css.error);
+		return process.exit(1);
+	}
+	const readme= join(folder_root, "README.md");
+	const readme_content= existsSync(readme) ? readFileSync(readme, "utf8") : "";
+	if(!readme_content){
+		log("%cNo `README.md` (content) found in `bs` directory", css.error);
+		return process.exit(1);
+	}
+	readme_content.split("\n")
+		.forEach(function echoLine(line){
+			if(line.trim().startsWith("#"))
+				return log("%c"+line, css.headline);
+			log(line);
+		});
 	process.exit(0);
 }
 function ls(){
@@ -105,13 +138,7 @@ function ls(){
 	});
 }
 function lsPrintNth(file){
-	const c= config.executables[file];
 	let out= "> "+fc(file);
-	if(c)
-		if(c.default)
-			out+= " (default)";
-		if(c.info)
-			out+= ": "+format("%c"+c.info, css.info);
 	log(out);
 }
 function run(script){
@@ -119,11 +146,8 @@ function run(script){
 	const args= process.argv.slice(2);
 	
 	if(args[0]===".run") args.shift();
-	if(!args.length){
-		const is_default= Object.entries(config.executables).find(([_, c])=> c.default);
-		if(!is_default) return runFallback();
-		script= is_default[0];
-	}
+	if(!args.length) return runFallback();
+
 	else args.shift();
 	catchError();
 	const head= lsPrintNth.bind(null, script);
@@ -166,14 +190,13 @@ function completion(shell){
 	if("bash"===shell)
 		return completionRegisterBash(name);
 	if("bash--complete"===shell)
-		return completionBash({ api, ls, config }, process.argv.slice(4));
+		return completionBash({ api, ls }, process.argv.slice(4));
 	log("Unknown shell: "+shell);
 	process.exit(1);
 }
 
 function loadBS(){
 	if(!folder_root) folder_root= findBS();
-	if(!config) config= require("./src/config.js")(folder_root);
 }
 function findBS(cwd= pwd()){
 	const folder_root= "/bs"; // allow change?

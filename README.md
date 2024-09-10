@@ -35,10 +35,11 @@ Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
 	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
-	- (optional, [see below](#config-info-files)) list info texts: `grep -H info bs/.*.toml`, `grep -HR info bs --include=.*.toml`
+	- (optional, [see below](#config-info-files)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`
 - using `bs`:
 	- Run command: `bs build some-argument`
 	- Lists commands (with [info texts](#config-info-files)): `bs .ls`
+	- Cat README: `bs .cat`
 
 Now focus on creating building flows. For parallel tasts, you can
 use this pattern:
@@ -86,28 +87,12 @@ You can find binaries on [Release](https://github.com/jaandrle/bs/releases/lates
 
 Or use: `npm install https://github.com/jaandrle/bs --location=global`
 
-### Config/Info files
-You can create `.command.toml` file to describe `command`
-and add additional configuration. Example:
-```
-buld.sh
-.build.toml
-```
-```toml
-#.build.toml
-info= "Description of command"
-default= true
+### ~Config/Info files~
+[This feature](https://github.com/jaandrle/bs/blob/adfbe3dc419b3189a1f9661d308c293b1e3b0514/README.md#configinfo-files) has been removed in version 0.8.
+It seems to be better to use `bs/README.md` for comment your build scripts.
+See example for current project [`bs/README.md`](./bs/README.md).
 
-[completions]
-__all= [ "--help", "--version" ]
-cmd= []
-```
-…all is optional. But:
-- `info`: this text is listed aside of command name (e.g. `bs .ls`)
-- `default`: this changes behavior of plain `bs`. By default it runs `.ls`, now it runs marked command
-- `completions`: provide options for completions `bs .run build …`/`bs build …`
-	- `__all`: these options are listed for all sub-commands
-	- `cmd`: registers sub-command and its possible arguments (`bs .run build cmd …`)
+You can than use `cat bs/README.md` to get quick overview of available commands.
 
 ### `bs` synopsis
 See [bs.js (line ≥31)](./bs.js#L31).

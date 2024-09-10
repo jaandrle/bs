@@ -1,6 +1,6 @@
 const { pipe }= require("./utils.js");
 const log= console.log.bind(console);
-function completionBash({ api, ls, config }, [ level, now, prev, first, second, third ]){
+function completionBash({ api, ls }, [ level, now, prev, first, second, third ]){
 	level-= 2;
 	const matches= arr=> {
 		let out= arr.filter(item=> item.indexOf(now)===0);
@@ -26,14 +26,6 @@ function completionBash({ api, ls, config }, [ level, now, prev, first, second, 
 	}
 	if(first.startsWith("."))
 		return resolve(options_global);
-	if(!Object.hasOwn(config.executables, first))
-		process.exit(0);
-	
-	const { commands= {}, __all= [] }= config.executables[first];
-	if(level===1)
-		return resolve([ ...Object.keys(commands), ...__all ]);
-	if(commands[second])
-		return resolve([ ...commands[second], ...__all ]);
 	process.exit(0);
 }
 function completionRegisterBash(name){

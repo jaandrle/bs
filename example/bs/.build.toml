@@ -1,5 +1,0 @@
-info= "Test Build #1"
-
-[completions]
-__all= [ "--help", "--version" ]
-production= [ "--target" ]
