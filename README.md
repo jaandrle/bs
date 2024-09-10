@@ -35,10 +35,10 @@ Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
 	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
-	- (optional, [see below](#configinfo-files)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`
+	- (optional, [see below](#configinfo-files-using-readmemd)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`
 - using `bs`:
 	- Run command: `bs build some-argument`
-	- Lists commands (with [info texts](#config-info-files)): `bs .ls`
+	- Lists commands: `bs .ls`
 	- Cat README: `bs .cat`
 
 Now focus on creating building flows. For parallel tasts, you can
@@ -87,7 +87,7 @@ You can find binaries on [Release](https://github.com/jaandrle/bs/releases/lates
 
 Or use: `npm install https://github.com/jaandrle/bs --location=global`
 
-### ~Config/Info files~
+### ~Config/Info files~ Using README.md
 [This feature](https://github.com/jaandrle/bs/blob/adfbe3dc419b3189a1f9661d308c293b1e3b0514/README.md#configinfo-files) has been removed in version 0.8.
 It seems to be better to use `bs/README.md` for comment your build scripts.
 See example for current project [`bs/README.md`](./bs/README.md).
