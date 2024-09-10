@@ -35,7 +35,7 @@ Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
 	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
-	- (optional, [see below](#config-info-files)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`
+	- (optional, [see below](#configinfo-files)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`
 - using `bs`:
 	- Run command: `bs build some-argument`
 	- Lists commands (with [info texts](#config-info-files)): `bs .ls`
