@@ -1,6 +1,5 @@
-const { pipe }= require("./utils.js");
 const log= console.log.bind(console);
-function completionBash({ api, ls }, [ level, now, prev, first, second, third ]){
+function completionBash({ api, ls }, [ level, now= "", prev, first, second, third ]){
 	level-= 2;
 	const matches= arr=> {
 		let out= arr.filter(item=> item.indexOf(now)===0);
@@ -11,12 +10,14 @@ function completionBash({ api, ls }, [ level, now, prev, first, second, third ])
 	}
 	const resolve= arr=> { log(matches(arr)); return process.exit(0); };
 	const options_global= api.tree.__all__.options.map(r=> r[0]).concat("--help", "--version");
-	if(!level) return pipe(
-		()=> Object.keys(api.tree).filter(c=> !c.startsWith("__")),
-		arr=> arr.concat(...options_global),
-		arr=> arr.concat(...ls()),
-		resolve
-	)();
+	if(!level){
+		if(now.startsWith("."))
+			return resolve(Object.keys(api.tree).filter(c=> !c.startsWith("__")));
+		if(now.startsWith("-"))
+			return resolve(options_global);
+		else
+			return resolve(ls());
+	}
 	if(first===".run"){
 		if(level===1)
 			return resolve(ls().concat(...options_global));
