@@ -36,7 +36,7 @@
 		"sade": "~1.8"
 	},
 	"engines": {
-		"node": "~18.19"
+		"node": ">=18.19"
 	},
 	"pkg": {
 		"assets": "./package.json"

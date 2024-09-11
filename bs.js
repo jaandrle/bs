@@ -19,6 +19,7 @@ const // global consts
 		.tab::before { content: "	"; }
 		.info {}
 		.headline { color: magenta; }
+		.highlight { color: lightyellow; }
 	`,
 	{ version, name, homepage, description }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json");
 let // bs folder
@@ -56,49 +57,90 @@ const api= require("sade")(name)
 		`[1] use ${fc`chmod +x`} and shebang² like ${fc`#!/usr/bin/env node`} (similarly for bash, …)`,
 		"[2] https://en.wikipedia.org/wiki/Shebang_(Unix)"
 	].map(linesToMaxLength(65)))
-.command(".run [script]", "Run the given build executable", { default: true })
+
+	.command(
+		".run [script]",
+		"Run the given build executable "+format("%c (default when `bs [script]`)", css.highlight),
+		{ default: true }
+	)
 	.action(run)
-.command(".ls", "Lists all available executables")
-	.action(()=> ( ls().forEach(lsPrintNth), process.exit(0) ))
-.command(".init [root]", [ "This initializes the projects bs directory",
-	`With ${fc`root`} folder defaults to ${fc`.`}.` ])
+
+	.command(
+		".ls",
+		"Lists all available executables"+format("%c (default when only `bs`)", css.highlight),
+	)
+	.action(()=> {
+		const list= ls();
+		if(!list.length){
+			log(`No executables found in '${folder_root}'.`);
+			log(`Run %c${name} --help%c for more info.`, css.code, css.unset);
+			return process.exit(1);
+		}
+		list.forEach(lsPrintNth);
+		log("\nFor more info use %cbs .cat%c", css.code, css.unset);
+		return process.exit(0);
+	})
+
+	.command(".init [root]", [ "This initializes the projects bs directory",
+		`With ${fc`root`} folder defaults to ${fc`.`}.` ])
 	.action(init)
-.command(".readme", "This is primarly used for update current README.md content.")
+
+	.command(".readme", "This is primarly used for update current bs/README.md content.")
 	.action(init)
-.command(".cat", "This prints README.md content")
+
+	.command(".cat", "This prints bs/README.md content")
 	.action(cat)
-.command(".completion <shell>", [ "Register a completions for the given shell",
-	`This provides completions for ${fc`bs`} itself and available executables`,
-	"and argumnets for executables if specify in corresponding config file.",
-	"",
-	"To allow completions:",
-	`Just add ${fc`eval "$(${name} .completion bash)"`} to your ${fc`.bashrc`}` ])
+
+	.command(".completion <shell>", [ "Register a completions for the given shell",
+		`This provides completions for ${fc`bs`} itself and available executables`,
+		"and argumnets for executables if specify in corresponding config file.",
+		"",
+		"To allow completions:",
+		`Just add ${fc`eval "$(${name} .completion bash)"`} to your ${fc`.bashrc`}` ])
 	.action(completion);
 api.parse(passBuildArgs());
 
-function init(root= pwd()){
-	const is_init= process.argv.slice(2)[0]===".init";
-	const folder_root_local= is_init ? join(root, name) : ( loadBS(), folder_root );
-	if(!existsSync(folder_root_local)) mkdirSync(folder_root_local);
-	console.log("Folder: "+folder_root_local);
-	const execs= listExecutables(folder_root_local, 0).map(e=> e.replace(folder_root_local+"/", ""));
-	console.log("Executables: "+execs.join(", "));
-	const readme= join(folder_root_local, "README.md");
-	const readme_content= existsSync(readme) ? readFileSync(readme, "utf8").split("\n") : [
+function readReadme(path_bs){
+	const path= join(path_bs, "README.md");
+	const content= existsSync(path) ? readFileSync(path, "utf8").split("\n") : [
 		"# "+headline,
 		`This project uses [${homepage.slice("https://github.com/".length)}: ${description}](${homepage}).`,
 		"",
 		"## Available executables",
 		"",
 	];
-	const execs_known= readme_content.flatMap((line, i)=> line.match(/^### bs\/(.*)/) ? [ readme_content[i] ] : []);
+	let h_level= 3; // defaults to ###
+	const found= content
+		.flatMap((line, i)=> line.match(/^#+ `?(.\/)?bs\/(.*)/) ? [ [ content[i], i ] ] : []) //`
+		.map(function([ l, i ]){
+			h_level= l.indexOf(" ");
+			const script_start= l.indexOf("bs/")+3;
+			// index of space or ` or line end
+			const script_end= /( |`|$)/g.exec(l.slice(script_start));
+			const end_adjust= script_start + ( script_end[0]!=="" ? 0 : 1 );
+			const key= l.slice(script_start, script_end.index+end_adjust);
+			return [ key, i ];
+		});
+
+	return { path, content, found: Object.fromEntries(found), h_level };
+}
+
+function init(root= pwd()){
+	const is_init= process.argv.slice(2)[0]===".init";
+	const folder_root_local= is_init ? join(root, name) : ( loadBS(), folder_root );
+	if(!existsSync(folder_root_local)) mkdirSync(folder_root_local);
+	console.log("Folder: "+folder_root_local);
+	const readme= readReadme(folder_root_local);
+	const execs= listExecutables(folder_root_local, 0).map(e=> e.replace(folder_root_local+"/", ""));
+	const execs_known= Object.keys(readme.found);
+	console.log("Executables: "+execs.join(", "));
 	const execs_add= execs
-		.map(e=> `### bs/${e}`)
-		.filter(e=> !execs_known.includes(e));
-	writeFileSync(readme, readme_content.join("\n"));
+		.filter(e=> !execs_known.includes(e))
+		.map(e=> "#".repeat(readme.h_level)+" bs/"+e);
+	writeFileSync(readme.path, readme.content.join("\n"));
 	if(execs_add.length)
 		console.log("Missing in README: \n```markdown\n"+execs_add.join("\n")+"\n```");
-	console.log("Readme: "+readme);
+	console.log("Readme: "+readme.path);
 	process.exit(0);
 }
 function cat(){
@@ -123,22 +165,28 @@ function cat(){
 }
 function ls(){
 	loadBS();
+	const { content, found }= readReadme(folder_root);
 	if(!folder_root) return [];
 
 	return listExecutables(folder_root, 0)
 	 .map(pipe(
 		f=> f.slice(folder_root.length+1),
-		path=> path.replace(/\.[^/.]+$/, "")
+		function(script){
+			const name= script.replace(/\.[^/.]+$/, "");
+			const readme= Reflect.has(found, script) ? found[script] : -2;
+			return { script, name, docs: content[readme+1] };
+		}
 	 ))
-	.sort(function(a, b){
+	.sort(function({ script: a }, { script: b }){
 		const deep= [ a, b ].reduce((acc, curr, i)=>
 			acc + (-1)**i * (curr.match(new RegExp("/", "g")) || []).length, 0);
 		if(deep) return deep;
 		return a.localeCompare(b);
 	});
 }
-function lsPrintNth(file){
-	let out= "> "+fc(file);
+function lsPrintNth({ script, docs }){
+	let out= "> "+fc(script);
+	if(docs) out+= ": "+docs+"…";
 	log(out);
 }
 function run(script){
@@ -146,11 +194,10 @@ function run(script){
 	const args= process.argv.slice(2);
 	
 	if(args[0]===".run") args.shift();
-	if(!args.length) return runFallback();
+	if(!args.length) return api.tree[".ls"].handler();
 
 	else args.shift();
 	catchError();
-	const head= lsPrintNth.bind(null, script);
 	// TODO: what about `./` in args when cwd≠folder_root/..
 	process.chdir(folder_root.replace(/\/bs$/, ""));
 	script= "bs/"+script;
@@ -165,7 +212,7 @@ function run(script){
 		return process.exit(1);
 	}
 	
-	head();
+	lsPrintNth({ script });
 	const { spawn }= require("node:child_process");
 	return spawn(script, args, { stdio: "inherit" })
 		.on("exit", function onexit(exit_code, signal){
@@ -176,21 +223,15 @@ function run(script){
 			process.kill(process.pid, signal)
 		});
 }
-function runFallback(){
-	const list= ls();
-	if(list.length)
-		return list.forEach(lsPrintNth);
-	
-	log(`%c${name}@v${version}`, css.info);
-	log(`Run %c$ ${name} --help%c for more info.`, css.code, css.unset);
-	return process.exit(0);
-}
 function completion(shell){
 	const { completionBash, completionRegisterBash }= require("./src/completion.js");
 	if("bash"===shell)
 		return completionRegisterBash(name);
 	if("bash--complete"===shell)
-		return completionBash({ api, ls }, process.argv.slice(4));
+		return completionBash(
+			{ api, ls: ()=> ls().map(r=> r.name) },
+			process.argv.slice(4)
+		);
 	log("Unknown shell: "+shell);
 	process.exit(1);
 }
