@@ -81,7 +81,7 @@ const api= require("sade")(name)
 		return process.exit(0);
 	})
 
-	.command(".init [root]", [ "This initializes the projects bs directory",
+	.command(".mkdir [root]", [ "This initializes the projects bs directory",
 		`With ${fc`root`} folder defaults to ${fc`.`}.` ])
 	.action(init)
 

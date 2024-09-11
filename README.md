@@ -31,16 +31,50 @@ Your working directory should contain `bs` directory with building
 scrips/executables. You can use [`bs`](#bs) utility with auto-find
 feature.
 
+### Executing scripts
 Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
 	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
-	- (optional, [see below](#configinfo-files-using-readmemd)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`
+	- create folder: `mkdir bs`, `mkdir -p bs`, `touch README.md`, …
+	- (optional, [see below](#configinfo-files-using-readmemd)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`, …
 - using `bs`:
 	- Run command: `bs build some-argument`
 	- Lists commands: `bs .ls`
+	- create folder: `bs .mkdir`
 	- Cat README: `bs .cat`
 
+### Organizing scripts
+There are no rules, *it is all up to you*. But definitely
+we can put together some *suggestions* to work with bs more
+**happily**.
+
+1. prefers **short names** without unnecessary
+   special characters (spaces, brackets, …)
+1. *provide* `--help` options for your scripts
+1. *use subdirectories* for subtasks
+1. *use dots* in names for non-scripts (like `.config.js`,
+   `.common.js`, `.utils.js`, …)
+1. provide `README.md` to comment your build scripts
+
+```
+bs/
+├───build.js
+├───build/
+│   ├───html.js
+│   └───sass.js
+├───run.js
+├───publish.js
+├───.config.js
+└───README.md
+```
+
+PS: You can create alias for task with:
+```bash
+ln -rfs bs/target bs/alias
+```
+
+### Build flows
 Now focus on creating building flows. For parallel tasts, you can
 use this pattern:
 ```bash
@@ -67,13 +101,6 @@ bs/taskC
 #!/usr/bin/env bash
 set -eou pipefail
 cat src/*.js | manipulate > index.js
-```
-
-You can create alias for task with:
-```bash
-ln -rfs bs/target bs/alias
-# optionaly
-ln -rfs bs/.target.toml bs/.alias.toml
 ```
 
 ## `bs`
@@ -104,12 +131,8 @@ To allow completions just add `eval "$(bs .completion bash)"` to your `.bashrc`.
 You can use [Git - Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to share your build scrips across your projects.
 
 ## WIP
-- [x] provide `bs` binary
-- [x] some missing? commands in `bs` (maybe `.init`)
-- [x] docs for `.command.toml` (`bs` completion)
-- [x] docs for git submodules to share build scripts
+- [ ] provide `bs` via npm
 - [ ] docs for coexistence with others (such as `npm run`)
-- [x] examples how to use bash for parallel/serial execution
 
 ## Acknowledgments
 - [labaneilers/bs: The simplest possible build system using bash](https://github.com/labaneilers/bs)
