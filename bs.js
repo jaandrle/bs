@@ -20,6 +20,8 @@ const // global consts
 		.info {}
 		.headline { color: magenta; }
 		.highlight { color: lightyellow; }
+		.script::before { content: "λ "; }
+		.cwd::before { content: "⌂ "; }
 	`,
 	{ version, name, homepage, description }= pipe( readFileSync, JSON.parse )(__dirname+"/package.json");
 let // bs folder
@@ -70,7 +72,7 @@ const api= require("sade")(name)
 		"Lists all available executables"+format("%c (default when only `bs`)", css.highlight),
 	)
 	.action(()=> {
-		const list= ls();
+		const list= ls({ is_out: true });
 		if(!list.length){
 			if(!folder_root){
 				log("%cNo `bs` for current directory: %c%s", css.error, css.unset, pwd());
@@ -153,6 +155,7 @@ function cat(){
 		log("%cNo `bs` directory found", css.error);
 		return process.exit(1);
 	}
+	log("%c"+folder_root, css.cwd);
 	const readme= join(folder_root, "README.md");
 	const readme_content= existsSync(readme) ? readFileSync(readme, "utf8") : "";
 	if(!readme_content){
@@ -167,9 +170,10 @@ function cat(){
 		});
 	process.exit(0);
 }
-function ls(){
+function ls({ is_out= false }= {}){
 	loadBS();
 	if(!folder_root) return [];
+	if(is_out) log("%c"+folder_root, css.cwd);
 	const { content, found }= readReadme(folder_root);
 
 	return listExecutables(folder_root, 0)
@@ -189,9 +193,9 @@ function ls(){
 	});
 }
 function lsPrintNth({ script, docs }){
-	let out= "> "+fc(script);
+	let out= fc(script);
 	if(docs) out+= ": "+docs+"…";
-	log(out);
+	log("%c"+out, css.script);
 }
 function run(script){
 	loadBS();
@@ -211,6 +215,7 @@ function run(script){
 		if(candidate)
 			script= candidate;
 	}
+	log("%c%s", css.cwd, folder_root);
 	if(!isExecutable(script)){
 		log(`%c'${script}' doesn't exist or is not executable`, css.error);
 		return process.exit(1);
@@ -255,7 +260,11 @@ function completionScript(name){
 	const { script }= ls().find(f=> f.name===name) || {};
 	if(!script) return end_empty;
 	const { spawnSync }= require("node:child_process");
-	return JSON.parse(spawnSync(bsrc, [ "completion", script ]).stdout);
+	try {
+		return JSON.parse(spawnSync(bsrc, [ "completion", script ]).stdout);
+	} catch(e){
+		return end_empty;
+	}
 }
 
 function loadBS(){
