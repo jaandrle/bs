@@ -229,11 +229,29 @@ function completion(shell){
 		return completionRegisterBash(name);
 	if("bash--complete"===shell)
 		return completionBash(
-			{ api, ls: ()=> ls().map(r=> r.name) },
+			{ api, completionScript, ls: ()=> ls().map(r=> r.name) },
 			process.argv.slice(4)
 		);
 	log("Unknown shell: "+shell);
 	process.exit(1);
+}
+function completionScript(name){
+	let bsrc;
+	if(!folder_root) loadBS();
+	const end_empty= { "subcommands": [] };
+	if(!folder_root) return end_empty;
+
+	const { readdirSync }= require("node:fs");
+	for(const file of readdirSync(folder_root)){
+		if(!file.startsWith(".bsrc")) continue;
+		bsrc= join(folder_root, file);
+		break;
+	}
+	if(!bsrc || !isExecutable(bsrc)) return end_empty;
+	const { script }= ls().find(f=> f.name===name) || {};
+	if(!script) return end_empty;
+	const { spawnSync }= require("node:child_process");
+	return JSON.parse(spawnSync(bsrc, [ "completion", script ]).stdout);
 }
 
 function loadBS(){

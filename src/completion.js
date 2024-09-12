@@ -1,5 +1,5 @@
 const log= console.log.bind(console);
-function completionBash({ api, ls }, [ level, now= "", prev, first, second, third ]){
+function completionBash({ api, completionScript, ls }, [ level, now= "", prev, first, second, third ]){
 	level-= 2;
 	const matches= arr=> {
 		let out= arr.filter(item=> item.indexOf(now)===0);
@@ -27,19 +27,33 @@ function completionBash({ api, ls }, [ level, now= "", prev, first, second, thir
 	}
 	if(first.startsWith("."))
 		return resolve(options_global);
-	process.exit(0);
+	if(!ls().includes(first))
+		return process.exit(0);
+	
+	// TODO: https://github.com/fvictorio/completely
+	level-= 1; // indexing from 0
+	const { subcommands }= completionScript(first);
+	try{
+		if(!subcommands.length) return process.exit(0);
+		if(!level && subcommands.length > 1)
+			return resolve(subcommands.flatMap(r=> r.command));
+		
+		const subcommand= subcommands.length === 1 ? subcommands[0] : subcommands.find(r=> r.command===second);
+		return resolve(subcommand.flags.map(r=> r.name));
+	} catch (_){
+		log(".bsrc has probably invalid json scheme");
+		return process.exit(1);
+	}
 }
 function completionRegisterBash(name){
 	log([
 		`__${name}_opts()`,
 		"{",
-		` COMPREPLY=( $(${name} .completion bash--complete "\${#COMP_WORDS[@]}" "\${COMP_WORDS[COMP_CWORD]}" "\${COMP_WORDS[COMP_CWORD-1]}" "\${COMP_WORDS[1]}" "\${COMP_WORDS[2]}" "\${COMP_WORDS[3]}") )`,
-		' local l="2"',
-		' if [[ "${COMP_WORDS[1]}" == \\.* ]]; then',
-		'  local l="3"',
-		" fi",
-		' if [[ "${#COMP_WORDS[@]}" -gt "$l" ]]; then',
-		'  COMPREPLY+=( $(compgen -A file -- "${COMP_WORDS[COMP_CWORD]}") )',
+		"local current=${COMP_WORDS[COMP_CWORD]}",
+		` COMPREPLY=( $(${name} .completion bash--complete "\${#COMP_WORDS[@]}" "\$current" "\${COMP_WORDS[COMP_CWORD-1]}" "\${COMP_WORDS[1]}" "\${COMP_WORDS[2]}" "\${COMP_WORDS[3]}") )`,
+		// current word starts with ./ or ../
+		' if [[ "$current" == \\.\\/* ]] || [[ "$current" == \\.\\.\\/* ]]; then',
+		'  COMPREPLY+=( $(compgen -A file -- "$current") )',
 		" fi",
 		" return 0",
 		"}",
