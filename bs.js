@@ -72,7 +72,11 @@ const api= require("sade")(name)
 	.action(()=> {
 		const list= ls();
 		if(!list.length){
-			log(`No executables found in '${folder_root}'.`);
+			if(!folder_root){
+				log("%cNo `bs` for current directory: %c%s", css.error, css.unset, pwd());
+				log("You may want to run %cbs .mkdir%c", css.code, css.unset);
+			} else
+				log(`No executables found in '${folder_root}'.`);
 			log(`Run %c${name} --help%c for more info.`, css.code, css.unset);
 			return process.exit(1);
 		}
@@ -126,7 +130,7 @@ function readReadme(path_bs){
 }
 
 function init(root= pwd()){
-	const is_init= process.argv.slice(2)[0]===".init";
+	const is_init= process.argv.slice(2)[0]===".mkdir";
 	const folder_root_local= is_init ? join(root, name) : ( loadBS(), folder_root );
 	if(!existsSync(folder_root_local)) mkdirSync(folder_root_local);
 	console.log("Folder: "+folder_root_local);
@@ -165,8 +169,8 @@ function cat(){
 }
 function ls(){
 	loadBS();
-	const { content, found }= readReadme(folder_root);
 	if(!folder_root) return [];
+	const { content, found }= readReadme(folder_root);
 
 	return listExecutables(folder_root, 0)
 	 .map(pipe(
