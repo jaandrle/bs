@@ -4,7 +4,7 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 	const matches= arr=> {
 		let out= arr.filter(item=> item.indexOf(now)===0);
 		if(!now.includes("/"))
-			out= out.map(f=> f.includes("/") ? f.slice(0, f.indexOf("/")) : f);
+			out= out.map(f=> f.includes("/") ? f.slice(0, f.indexOf("/")+1) : f);
 		if(out.length) return out.join(" ");
 		return "";
 	}
@@ -57,7 +57,7 @@ function completionRegisterBash(name){
 		" fi",
 		" return 0",
 		"}",
-		`complete -F __${name}_opts ${name}`,
+		`complete -o nospace -F __${name}_opts ${name}`,
 	].join("\n"));
 	process.exit(0);
 }
