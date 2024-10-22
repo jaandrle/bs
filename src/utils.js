@@ -53,6 +53,7 @@ function listExecutables(dir, level){
 	if(!existsSync(dir)) return out;
 	
 	for(const file of readdirSync(dir)){
+		if(file.startsWith('.')) continue;
 		const file_path= dir + '/' + file;
 		const stats= statSync(file_path);
 		if(stats.isDirectory() && level < 3){

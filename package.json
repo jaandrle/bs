@@ -1,6 +1,6 @@
 {
 	"name": "bs",
-	"version": "0.7.4",
+	"version": "0.8.0",
 	"description": "The simplest possible build system using executable/bash scripts",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
@@ -32,11 +32,11 @@
 		"pkg": "~5.8"
 	},
 	"dependencies": {
-		"css-in-console": "~2.0",
+		"css-in-console": "~1.1",
 		"sade": "~1.8"
 	},
 	"engines": {
-		"node": "~18.19"
+		"node": ">=18.19"
 	},
 	"pkg": {
 		"assets": "./package.json"

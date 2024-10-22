@@ -31,15 +31,50 @@ Your working directory should contain `bs` directory with building
 scrips/executables. You can use [`bs`](#bs) utility with auto-find
 feature.
 
+### Executing scripts
 Now you can run and lists your build options like:
 - raw:
 	- Run command: `bs/build.js some-argument`
-	- Lists commands: `find bs -type f -executable`
-	(list help texts `grep -H help bs/.*.toml bs/*/.*.toml`, see below)
+	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
+	- create folder: `mkdir bs`, `mkdir -p bs`, `touch README.md`, …
+	- (optional, [see below](#configinfo-files-using-readmemd)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`, …
 - using `bs`:
 	- Run command: `bs build some-argument`
 	- Lists commands: `bs .ls`
+	- create folder: `bs .mkdir`
+	- Cat README: `bs .cat`
 
+### Organizing scripts
+There are no rules, *it is all up to you*. But definitely
+we can put together some *suggestions* to work with bs more
+**happily**.
+
+1. prefers **short names** without unnecessary
+   special characters (spaces, brackets, …)
+1. *provide* `--help` options for your scripts
+1. *use subdirectories* for subtasks
+1. *use dots* in names for non-scripts (like `.config.js`,
+   `.common.js`, `.utils.js`, …)
+1. provide `README.md` to comment your build scripts
+
+```
+bs/
+├───build.js
+├───build/
+│   ├───html.js
+│   └───sass.js
+├───run.js
+├───publish.js
+├───.config.js
+└───README.md
+```
+
+PS: You can create alias for task with:
+```bash
+ln -rfs bs/target bs/alias
+```
+
+### Build flows
 Now focus on creating building flows. For parallel tasts, you can
 use this pattern:
 ```bash
@@ -68,13 +103,6 @@ set -eou pipefail
 cat src/*.js | manipulate > index.js
 ```
 
-You can create alias for task with:
-```bash
-ln -rfs bs/target bs/alias
-# optionaly
-ln -rfs bs/.target.toml bs/.alias.toml
-```
-
 ## `bs`
 This is just a simple helper providing nice outputs
 and make some operations easier.
@@ -86,31 +114,15 @@ You can find binaries on [Release](https://github.com/jaandrle/bs/releases/lates
 
 Or use: `npm install https://github.com/jaandrle/bs --location=global`
 
-### Config/Info files
-You can create `.command.toml` file to describe `command`
-and add additional configuration. Example:
-```
-buld.sh
-.build.toml
-```
-```toml
-#.build.toml
-info= "Description of command"
-default= true
+### ~Config/Info files~ Using README.md
+[This feature](https://github.com/jaandrle/bs/blob/adfbe3dc419b3189a1f9661d308c293b1e3b0514/README.md#configinfo-files) has been removed in version 0.8.
+It seems to be better to use `bs/README.md` for comment your build scripts.
+See example for current project [`bs/README.md`](./bs/README.md).
 
-[completions]
-__all= [ "--help", "--version" ]
-cmd= []
-```
-…all is optional. But:
-- `info`: this text is listed aside of command name (e.g. `bs .ls`)
-- `default`: this changes behavior of plain `bs`. By default it runs `.ls`, now it runs marked command
-- `completions`: provide options for completions `bs .run build …`/`bs build …`
-	- `__all`: these options are listed for all sub-commands
-	- `cmd`: registers sub-command and its possible arguments (`bs .run build cmd …`)
+You can than use `cat bs/README.md` to get quick overview of available commands.
 
 ### `bs` synopsis
-See [bs.js (line ≥24)](./bs.js#L24).
+See [bs.js (line ≥31)](./bs.js#L31).
 
 ### `bs` completions
 To allow completions just add `eval "$(bs .completion bash)"` to your `.bashrc`.
@@ -119,12 +131,8 @@ To allow completions just add `eval "$(bs .completion bash)"` to your `.bashrc`.
 You can use [Git - Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to share your build scrips across your projects.
 
 ## WIP
-- [x] provide `bs` binary
-- [ ] some missing? commands in `bs` (maybe `.init`)
-- [x] docs for `.command.toml` (`bs` completion)
-- [x] docs for git submodules to share build scripts
+- [ ] provide `bs` via npm
 - [ ] docs for coexistence with others (such as `npm run`)
-- [x] examples how to use bash for parallel/serial execution
 
 ## Acknowledgments
 - [labaneilers/bs: The simplest possible build system using bash](https://github.com/labaneilers/bs)
