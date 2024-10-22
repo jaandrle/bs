@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -eou pipefail
+csd="./${BASH_SOURCE[0]%/*}"
+. "$csd/build"
+cp -v "$csd/../dist/bs-linux" ~/bin/bs

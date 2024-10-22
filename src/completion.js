@@ -2,7 +2,7 @@ const log= console.log.bind(console);
 function completionBash({ api, completionScript, ls }, [ level, now= "", prev, first, second, third ]){
 	level-= 2;
 	const matches= arr=> {
-		let out= arr.filter(item=> item.indexOf(now)===0);
+		let out= arr.filter(item=> item.toLowerCase().indexOf(now.toLowerCase())!==-1).sort();
 		if(!now.includes("/"))
 			out= out.map(f=> f.includes("/") ? f.slice(0, f.indexOf("/")+1) : f);
 		if(out.length) return out.join(" ");
