@@ -122,7 +122,7 @@ See example for current project [`bs/README.md`](./bs/README.md).
 You can than use `cat bs/README.md` to get quick overview of available commands.
 
 ### `bs` synopsis
-See [bs.js (line ≥31)](./bs.js#L31).
+See [bs.js (line ≥41)](./bs.js#L41).
 
 ### `bs` completions
 To allow completions just add `eval "$(bs .completion bash)"` to your `.bashrc`.
