@@ -34,27 +34,25 @@ feature.
 ### Executing scripts
 Now you can run and lists your build options like:
 - raw:
-	- Run command: `bs/build.js some-argument`
-	- Lists commands: `find bs/** -executable`, `ls bs`, `find bs -type f -executable`, …
+	- run command: `bs/build.js some-argument`
+	- lists commands: `ls bs`, `tree bs`, `find bs/** -executable`, `find bs -type f -executable`, …
 	- create folder: `mkdir bs`, `mkdir -p bs`, `touch README.md`, …
 	- (optional, [see below](#configinfo-files-using-readmemd)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`, …
 - using `bs`:
-	- Run command: `bs build some-argument`
-	- Lists commands: `bs .ls`
+	- run command: `bs build some-argument`
+	- lists commands: `bs .ls`
 	- create folder: `bs .mkdir`
-	- Cat README: `bs .cat`
+	- cat README: `bs .cat`
 
 ### Organizing scripts
 There are no rules, *it is all up to you*. But definitely
 we can put together some *suggestions* to work with bs more
 **happily**.
 
-1. prefers **short names** without unnecessary
-   special characters (spaces, brackets, …)
+1. prefers **short names** without unnecessary special characters (spaces, brackets, …)
 1. *provide* `--help` options for your scripts
 1. *use subdirectories* for subtasks
-1. *use dots* in names for non-scripts (like `.config.js`,
-   `.common.js`, `.utils.js`, …)
+1. *use dots* in names for non-scripts (like `.config.js`, `.common.js`, `.utils.js`, …)
 1. provide `README.md` to comment your build scripts
 
 ```
