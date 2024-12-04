@@ -73,10 +73,10 @@ const api= require("sade")(name)
 	.action(run)
 
 	.command(
-		".ls",
+		".ls [filter]",
 		"Lists all available executables"+format("%c (default when only `bs`)", css.highlight),
 	)
-	.action(()=> {
+	.action((filter)=> {
 		const list= ls({ is_out: true });
 		if(!list.length){
 			if(!folder_root){
@@ -87,8 +87,6 @@ const api= require("sade")(name)
 			log(`Run %c${name} --help%c for more info.`, css.code, css.unset);
 			return process.exit(1);
 		}
-		const filter= argv[3];
-		if(filter) log(`Filter: ${filter}`);
 		(filter ? list.filter(x=> x.script.includes(filter)) : list)
 			.forEach(lsPrintNth);
 		log("\nFor more info use %cbs .cat%c", css.code, css.unset);
@@ -102,7 +100,7 @@ const api= require("sade")(name)
 	.command(".readme", "This is primarly used for update current bs/README.md content.")
 	.action(init)
 
-	.command(".cat", "This prints bs/README.md content")
+	.command(".cat [filter]", "This prints bs/README.md content")
 	.action(cat)
 
 	.command(".completion <shell>", [ "Register a completions for the given shell",
@@ -157,7 +155,7 @@ function init(root= pwd()){
 	console.log("Readme: "+readme.path);
 	process.exit(0);
 }
-function cat(){
+function cat(filter){
 	loadBS();
 	if(!folder_root){
 		log("%cNo `bs` directory found", css.error);
@@ -170,7 +168,6 @@ function cat(){
 		log("%cNo `README.md` (content) found in `bs` directory", css.error);
 		return process.exit(1);
 	}
-	const filter= argv[3];
 	let lines= [], filtered= false;
 	for(const line of readme_content.split("\n")){
 		if(!filter){
@@ -240,6 +237,11 @@ function run(script){
 		log("%c%s", css.cwd, folder_root);
 	if(!isExecutable(script)){
 		log(`%c'${script}' doesn't exist or is not executable`, css.error);
+		const found= ls().filter(f=> f.script.includes(script.slice(3)));
+		if(found.length){
+			log("\nYou may want to run:");
+			found.forEach(lsPrintNth);
+		}
 		return process.exit(1);
 	}
 	

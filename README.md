@@ -35,14 +35,16 @@ feature.
 Now you can run and lists your build options like:
 - raw:
 	- run command: `bs/build.js some-argument`
-	- lists commands: `ls bs`, `tree bs`, `find bs/** -executable`, `find bs -type f -executable`, …
+	- lists commands: `ls bs`, `find bs/** -executable`, `find bs -type f -executable`, …
+    - see structure: `tree bs`
 	- create folder: `mkdir bs`, `mkdir -p bs`, `touch README.md`, …
 	- (optional, [see below](#configinfo-files-using-readmemd)) list commands with commnets: `cat bs/README.md`, `bat bs/README.md`, …
 - using `bs`:
-	- run command: `bs build some-argument`
-	- lists commands: `bs .ls`
+	- run command: `bs build some-argument`, `bs .run build some-argument`
+	- lists commands: `bs`, `bs .ls`, `bs .ls filter`
+    - see structure: `tree bs`
 	- create folder: `bs .mkdir`
-	- cat README: `bs .cat`
+	- cat README: `bs .cat`, `bs .cat filter`
 
 ### Organizing scripts
 There are no rules, *it is all up to you*. But definitely

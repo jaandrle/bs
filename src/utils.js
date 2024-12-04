@@ -47,7 +47,7 @@ function passBuildArgs(){
 	return argv.map(l=> l==="--help" || l==="--version" ? "--$$$" : l);
 }
 
-const { accessSync, readdirSync, statSync, existsSync, constants }= require("node:fs");
+const { readdirSync, statSync, existsSync, constants }= require("node:fs");
 function listExecutables(dir, level){
 	const out= [];
 	if(!existsSync(dir)) return out;
@@ -66,8 +66,8 @@ function listExecutables(dir, level){
 }
 function isExecutable(path){
 	try{
-		accessSync(path, constants.X_OK);
-		return true;
+		const stat= statSync(path);
+		return stat.isFile() && stat.mode & constants.S_IXUSR;
 	} catch(_){
 		return false;
 	}
