@@ -50,9 +50,8 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 }
 function completionRegisterBash(name){
 	log([
-		`__${name}_opts()`,
-		"{",
-		"local current=${COMP_WORDS[COMP_CWORD]}",
+		`__${name}_opts(){`,
+		" local current=${COMP_WORDS[COMP_CWORD]}",
 		` COMPREPLY=( $(${name} .completion bash--complete "\${#COMP_WORDS[@]}" "\$current" "\${COMP_WORDS[COMP_CWORD-1]}" "\${COMP_WORDS[1]}" "\${COMP_WORDS[2]}" "\${COMP_WORDS[3]}") )`,
 		// current word starts with ./ or ../
 		' if [[ "$current" == \\.\\/* ]] || [[ "$current" == \\.\\.\\/* ]]; then',
