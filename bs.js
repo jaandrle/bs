@@ -2,12 +2,17 @@
 "use strict";
 const // global functions/utils
 	{ log, format }= require("css-in-console"),
-	{ readFileSync, existsSync, mkdirSync, writeFileSync, statSync }= require("node:fs"),
+	{ readFileSync, existsSync, mkdirSync, writeFileSync, statSync, fstatSync }= require("node:fs"),
 	{ join }= require("node:path"),
+	{ stdout, argv }= require("node:process"),
 	{ pipe,
 	  linesToMaxLength, passBuildArgs,
 	  listExecutables, isExecutable }= require("./src/utils.js"),
 	{ cwd: pwd }= require("node:process");
+const stdoutIsFIFO= (()=> {
+	try { return fstatSync(stdout.fd).isFIFO(); }
+	catch(_){ return false; }
+})();
 /** @type {()=> void} */
 let error;
 const // global consts
@@ -49,7 +54,7 @@ const api= require("sade")(name)
 		`3. This utility can find current or any parent folder containing ${fc(name)} directory`,
 		"",
 		"To point out:",
-		`1. To prevent colision all ${fc(name)} commands starts with ${fc`.`}c (e.g. ${fc`.ls`})`,
+		`1. To prevent colision all ${fc(name)} commands starts with ${fc`.`} (e.g. ${fc`.ls`})`,
 		`2. It is a good practice to distinc non-commands from commands (eg. with preposition ${fc`.`}, ${fc`_`}, …)`,
 		"",
 		"Known pitfalls:",
@@ -82,7 +87,10 @@ const api= require("sade")(name)
 			log(`Run %c${name} --help%c for more info.`, css.code, css.unset);
 			return process.exit(1);
 		}
-		list.forEach(lsPrintNth);
+		const filter= argv[3];
+		if(filter) log(`Filter: ${filter}`);
+		(filter ? list.filter(x=> x.script.includes(filter)) : list)
+			.forEach(lsPrintNth);
 		log("\nFor more info use %cbs .cat%c", css.code, css.unset);
 		return process.exit(0);
 	})
@@ -132,7 +140,7 @@ function readReadme(path_bs){
 }
 
 function init(root= pwd()){
-	const is_init= process.argv.slice(2)[0]===".mkdir";
+	const is_init= argv.slice(2)[0]===".mkdir";
 	const folder_root_local= is_init ? join(root, name) : ( loadBS(), folder_root );
 	if(!existsSync(folder_root_local)) mkdirSync(folder_root_local);
 	console.log("Folder: "+folder_root_local);
@@ -162,12 +170,25 @@ function cat(){
 		log("%cNo `README.md` (content) found in `bs` directory", css.error);
 		return process.exit(1);
 	}
-	readme_content.split("\n")
-		.forEach(function echoLine(line){
-			if(line.trim().startsWith("#"))
-				return log("%c"+line, css.headline);
-			log(line);
-		});
+	const filter= argv[3];
+	let lines= [], filtered= false;
+	for(const line of readme_content.split("\n")){
+		if(!filter){
+			lines.push(line);
+			continue;
+		}
+		const is_headline= /^#+ *bs\//.test(line.trim());
+		if(is_headline){
+			if(filtered) filtered= false;
+			if(filter) filtered= line.includes(filter);
+		}
+		if(filtered) lines.push(line);
+	}
+	lines.forEach(function echoLine(line){
+		if(line.trim().startsWith("#"))
+			return log("%c"+line, css.headline);
+		log(line);
+	});
 	process.exit(0);
 }
 function ls({ is_out= false }= {}){
@@ -199,7 +220,7 @@ function lsPrintNth({ script, docs }){
 }
 function run(script){
 	loadBS();
-	const args= process.argv.slice(2);
+	const args= argv.slice(2);
 	
 	if(args[0]===".run") args.shift();
 	if(!args.length) return api.tree[".ls"].handler();
@@ -215,13 +236,15 @@ function run(script){
 		if(candidate)
 			script= candidate;
 	}
-	log("%c%s", css.cwd, folder_root);
+	if(!stdoutIsFIFO)
+		log("%c%s", css.cwd, folder_root);
 	if(!isExecutable(script)){
 		log(`%c'${script}' doesn't exist or is not executable`, css.error);
 		return process.exit(1);
 	}
 	
-	lsPrintNth({ script });
+	if(!stdoutIsFIFO)
+		lsPrintNth({ script });
 	const { spawn }= require("node:child_process");
 	return spawn(script, args, { stdio: "inherit" })
 		.on("exit", function onexit(exit_code, signal){
@@ -239,7 +262,7 @@ function completion(shell){
 	if("bash--complete"===shell)
 		return completionBash(
 			{ api, completionScript, ls: ()=> ls().map(r=> r.name) },
-			process.argv.slice(4)
+			argv.slice(4)
 		);
 	log("Unknown shell: "+shell);
 	process.exit(1);

@@ -3,7 +3,8 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 	level-= 2;
 	const matches= arr=> {
 		let out= arr.filter(item=> item.toLowerCase().indexOf(now.toLowerCase())!==-1).sort();
-		if(!now.includes("/"))
+		// if(!now.includes("/"))
+		if(!now)
 			out= out.map(f=> f.includes("/") ? f.slice(0, f.indexOf("/")+1) : f);
 		if(out.length) return out.join(" ");
 		return "";
@@ -25,6 +26,8 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 		second= third;
 		level-= 1;
 	}
+	if(first===".cat" || first===".ls")
+		return resolve(ls().concat(...options_global));
 	if(first.startsWith("."))
 		return resolve(options_global);
 	if(!ls().includes(first))
