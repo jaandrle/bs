@@ -1,21 +1,27 @@
 name: Handle Release
 
 on:
+  workflow_dispatch:
   release:
     types: [created]
 
 jobs:
   main:
     runs-on: ubuntu-latest
+    environment: default
     steps:
-    - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
-    - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
         node-version: '18.x'
         cache: 'npm'
     - run: npm ci
     - run: bs/build dist
-    - uses: AButler/upload-release-assets@072dc74f9dae356bd7c45a0d0e998ca6d9854e01 # v2.0
+    - uses: AButler/upload-release-assets@3d6774fae0ed91407dc5ae29d576b166536d1777 # v3.0
       with:
         files: 'dist/*'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+    - run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+    - run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
