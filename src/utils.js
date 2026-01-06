@@ -49,19 +49,28 @@ function passBuildArgs(){
 
 const { readdirSync, statSync, existsSync, constants }= require("node:fs");
 function listExecutables(dir, level){
-	const out= [];
-	if(!existsSync(dir)) return out;
-	
-	for(const file of readdirSync(dir)){
-		if(file.startsWith('.')) continue;
-		const file_path= dir + '/' + file;
-		const stats= statSync(file_path);
-		if(stats.isDirectory() && level < 3){
-			out.push(...listExecutables(file_path, level + 1));
+	const out = [];
+	if (!existsSync(dir)) return out;
+
+	const stack = [ { path: dir, level: 0 } ];
+
+	while (stack.length > 0) {
+		const { path, level } = stack.pop();
+
+		for (const file of readdirSync(path)) {
+			if (file.startsWith('.')) continue;
+
+			const file_path = path + '/' + file;
+			const stats = statSync(file_path);
+
+			if (stats.isDirectory() && level < 3) {
+				stack.push({ path: file_path, level: level + 1 });
+			} else if (stats.isFile() && isExecutable(file_path)) {
+				out.push(file_path);
+			}
 		}
-		if(stats.isFile() && isExecutable(file_path))
-			out.push(file_path);
 	}
+
 	return out;
 }
 function isExecutable(path){

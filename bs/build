@@ -2,4 +2,24 @@
 # https://github.com/vercel/pkg
 set -eou pipefail
 folder=${1:-dist}
-npx pkg . --out-path "$folder"
+targets=(
+	"node18-linux-x64"
+	"node18-macos-x64"
+	"node18-macos-arm64" # experimental
+	"node18-win-x64"
+)
+targets_comma=''
+for target in "${targets[@]}"; do
+	if [[ "$targets_comma" == '' ]]; then
+		targets_comma="$target"
+	else
+		targets_comma="$targets_comma,$target"
+	fi
+done
+# https://github.com/vercel/pkg-fetch, add to git (for sure)?
+PKG_CACHE_PATH=bs/.cache \
+	npx pkg . \
+	--target "$targets_comma" \
+	--out-path "$folder" \
+	--compress GZip
+ls "$folder"
