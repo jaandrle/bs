@@ -2,13 +2,13 @@
 Following text provides suggestions for using bash to implement build system features.
 
 ## Build flows
-Now focus on creating building flows. For parallel tasts, you can use the
+Now focus on creating building flows. For parallel tasks, you can use the
 following pattern[^wget-parallel]:
 
 [^wget-parallel]: you can also use [templates](../extensions/): `bs/templates.sh bash/parallel >> script.sh`
 ```bash
 #!/usr/bin/env bash
-set -eou pipefail
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 (
 	trap 'kill 0' SIGINT ;
 	bs/taskA &
@@ -21,7 +21,7 @@ For serial tasks[^wget-sequence]:
 [^wget-sequence]: you can also use [templates](../extensions/): `bs/templates.sh bash/sequence >> script.sh`
 ```bash
 #!/usr/bin/env bash
-set -eou pipefail
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 bs/taskA &&
 bs/taskB &&
 bs/taskC
@@ -45,12 +45,21 @@ wait
 …pipe tasks:
 ```bash
 #!/usr/bin/env bash
-set -eou pipefail
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 cat src/*.js | manipulate > index.js
 ```
 
 ## Build dependencies
-You can use a dedicated file to explicitly define dependencies between tasks,
+The simplified version (just “announcing” dependencies) is declaring variables on top of the script file:
+```bash
+# depends on
+declare -r rollup='node_modules/.bin/rollup'
+declare -r analyze='bs/analyze'
+declare -r config='rollup.config.js'
+# …
+```
+
+Alternatively, you can use a dedicated file to explicitly define dependencies between tasks,
 see for example:
 
 ```
@@ -69,7 +78,7 @@ bs/lint.sh
 …and `build.sh` looks like:
 ```bash
 #!/usr/bin/env bash
-set -eou pipefail
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 bash bs/.build.deps
 # build logic
 ```
@@ -82,7 +91,7 @@ You can use timestamps[^timestamps] or hashes[^hashes] to determine whether a bu
 
 ```bash
 #!/usr/bin/env bash
-set -eou pipefail
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 src='src/index.js'
 out='build/app.js'
 if [[ -f "$out" && "$out" -nt "$src" ]]; then
@@ -93,7 +102,7 @@ fi
 …or
 ```bash
 #!/usr/bin/env bash
-set -eou pipefail
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 src='src/index.js'
 out='build/app.js'
 hash_file='bs/.cache/build.hash'

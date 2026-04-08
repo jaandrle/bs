@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# depends on
+declare -r readme='bs/README.md'
+
+isHelp() {
+	for arg in "$@"; do
+		[[ "$arg" == '-h' || "$arg" == '--help' ]] && return 0
+	done
+	return 1
+}
+echoReadmeInfo() {
+	local -r script="bs/${0##*/}"
+	local info
+	info="$(grep -A1 "## $script" "$readme" | tail -n1)"
+	cat <<-EOF
+	$info
+	Usage: $script [options]
+
+	Options:
+	  -h, --help: Show this help
+	EOF
+}

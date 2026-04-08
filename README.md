@@ -112,7 +112,7 @@ Now you can run and list your build options, for example:
 
 ### Build system features
 You can adapt `bs` scripts to your needs. As (bash) scripts, you can easily
-[**adds neccesary features (incremental builds, parallel execution, etc.)**](./docs/Features.md)
+[**adds necessary features (incremental builds, parallel execution, etc.)**](./docs/Features.md)
 only where you need them. Also it is easy to adjust scripts with parameters and
 environment variables.
 
@@ -147,15 +147,15 @@ npm install @jaandrle/bs --location=global
 
 ### Overview
 This script allows you to use build scripts in a more user-friendly way.
-So, this script is not neccessary, but it provides some helpers:
+So, this script is not necessary, but it provides some helpers:
 
 1. You can call executables without extensions (for example `bs/test.py` ⇔ `bs test`),
 1. You can use completion, see `.completion` command.
 1. This utility can find current or any parent folder containing `bs` directory.
 
 Important notes:
-1. To prevent colision all `bs` commands starts with `.` (e.g. `.ls`).
-1. It is a good practice to distinc non-tasks from tasks (eg. with preposition `.`, `_`, …) also for your build scripts (see above).
+1. To prevent collision all `bs` commands starts with `.` (e.g. `.ls`).
+1. It is a good practice to distinct non-tasks from tasks (e.g. with preposition `.`, `_`, …) also for your build scripts (see above).
 
 #### `.run [script]`
 Run the given build executable (default when `bs [script]`).
@@ -167,7 +167,7 @@ Lists all available executables (default when only `bs`).
 This initializes the projects bs directory. With `root` folder defaults to `.`.
 
 #### `.readme`
-This is primarly used for update current bs/README.md content.
+This is primary used for update current bs/README.md content.
 
 #### `.grep [filter]` (with `.cat` as an alias)
 This prints bs/README.md content with limited syntax highlight.
@@ -225,7 +225,7 @@ bs
 ```
 
 ### Provide git/… hooks
-You can create e. g. `bs/hooks-git` folder and [register hooks](https://git-scm.com/docs/githooks) using registration script[^wget-git]:
+You can create e.g. `bs/hooks-git` folder and [register hooks](https://git-scm.com/docs/githooks) using registration script[^wget-git]:
 
 [^wget-git]: you can also use [templates](./extensions/): `bs/templates.sh hooks/register-git >> bs/hooks-npm/prepare`
 

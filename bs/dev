@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
-set -eou pipefail
-csd="./${BASH_SOURCE[0]%/*}"
-. "$csd/build"
-cp -v "$csd/../dist/bs-linux" ~/bin/bs
+set -eo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
+. bs/.common || {
+	echo 'Please run this script from the project root directory' >&2;
+	exit 1;
+}
+# depends on
+declare -r build='bs/build'
+
+help(){
+	if ! isHelp "${@}"; then return 0; fi
+	echoReadmeInfo
+	echo '  linux: cp build to ~/.local/bin'
+	exit 0
+}
+main(){
+	help "${@}"
+	local -r isLinux="${1:-}"
+	"$build"
+	if [[ "$isLinux" != 'linux' ]]; then
+		exit 0
+	fi
+	cp -v "dist/bs-linux-x64" "$HOME/.local/bin/bs"
+}
+
+main "${@}"

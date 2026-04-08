@@ -7,6 +7,11 @@ This file contains todos and already implemented features
      on their file extension, which would make bs work more smoothly on Windows.”)
 - [ ] upgrade `bs/build` (also see TODO in [v0.9.0](#v0.9.0))
 
+## v1.0.0
+- [x] :abc: example bash task in now more “proffesional”
+- [x] :abc: shows “dependencies” pattern
+- [x] :zap: ups css-in-console
+
 ## v0.9.0
 - [x] :zap: (potentially BREAKING) fix provided relative paths when bs is run outside the root directory
     - `cd project && cd deep/path && bs build ./file` → “`bs build /home/…/project/deep/path/file`”
