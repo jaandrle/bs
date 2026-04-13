@@ -2,7 +2,6 @@
 /* global echo, $, pipe, s, fetch */
 const [ , cmd ]= $;
 s.cd($.pathFromURL(import.meta.url)`../`);
-if(cmd.startsWith("api/")) $.exit(1);
 try{
 	const { completions, completions_all }= s.$("-FS").run`./${cmd} __ALL__`.xargs(JSON.parse);
 	pipe(

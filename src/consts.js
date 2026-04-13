@@ -2,6 +2,7 @@ const // global functions/utils
 	{ log, format }= require("css-in-console"),
 	{ readFileSync }= require("node:fs"),
 	{ linesToMaxLength, pipe }= require("./utils.js");
+const chars= {};
 const css= log.css`
 	.error { color: lightred; }
 	.code { color: blue; }
@@ -14,12 +15,14 @@ const css= log.css`
 	.lowpriority { color: gray; }
 	.cwd::before { content: "⌂ "; }
 `;
+chars["css.script"]= 2;
 const { version, name: package_name, homepage, description }=
 	pipe( readFileSync, JSON.parse )(__dirname+"/../package.json");
 const name= package_name.startsWith("@") ? package_name.slice(package_name.indexOf("/")+1) : package_name;
 const headline= name+": Build system based on executables";
 
 const fc= (code, ...rest)=> format("%c"+( !Array.isArray(code) ? code : String.raw(code, ...rest) ), css.code); //format as code
+chars["fc"]= 2;
 const help = !process.argv.includes("--help") ? {} : {
 	describe: [
 		headline,
@@ -63,7 +66,7 @@ const help = !process.argv.includes("--help") ? {} : {
 };
 
 module.exports= {
-	css, fc,
+	css, fc, chars,
 	info: {
 		name, headline, description,
 		version,

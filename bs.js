@@ -14,7 +14,7 @@ const stdoutIsFIFO= (()=> {
 	try { return fstatSync(stdout.fd).isFIFO(); }
 	catch(_){ return false; }
 })();
-const { css, fc, info, help }= require("./src/consts.js");
+const { css, fc, chars, info, help }= require("./src/consts.js");
 function logHead(wd_bs){
 	if(stdoutIsFIFO) return;
 	let wd= join(wd_bs, "../");
@@ -193,8 +193,11 @@ function ls({ is_out= false }= {}){
 	});
 }
 function lsPrintNth({ script, docs }){
+	const { columns = 80 } = stdout;
 	let out= fc(script);
-	if(docs) out+= ": "+docs+"…";
+	const sep= ": ";
+	const chars_start = chars["css.script"] + chars.fc + script.length + sep.length;
+	if(docs) out+= sep+docs.slice(0, columns-chars_start-1 /* =… */)+"…";
 	log("%c"+out, css.script);
 }
 function run(script){
@@ -270,7 +273,7 @@ function completionScript(name){
 	if(!script) return end_empty;
 	const { spawnSync }= require("node:child_process");
 	try {
-		return JSON.parse(spawnSync(bsrc, [ "completion", script ]).stdout);
+		return JSON.parse(spawnSync(bsrc, [ script ]).stdout);
 	} catch(e){
 		return end_empty;
 	}

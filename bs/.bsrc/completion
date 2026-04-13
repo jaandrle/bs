@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+if [[ "${1:-}" != "dev" ]]; then
+	exit 0
+fi
+echo '{"subcommands":[{ "command": "linux" }]}'

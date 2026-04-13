@@ -25,7 +25,7 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 		second= third;
 		level-= 1;
 	}
-	if(first===".cat" || first===".ls")
+	if(first===".cat" || first===".grep" || first===".ls")
 		return resolveCompletions(ls().concat(...options_global), now);
 
 	if(first.startsWith("."))
@@ -37,14 +37,14 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 	try {
 		const { subcommands }= completionScript(first); // TODO: https://github.com/fvictorio/completely
 		if(!subcommands || !subcommands.length) return process.exit(0);
-		if(!level && subcommands.length > 1)
+		if(!level)
 			return resolveCompletions(subcommands.flatMap(r=> r.command), now);
 
 		const subcommand= subcommands.length === 1 ? subcommands[0] : subcommands.find(r=> r.command===second);
 		if(!subcommand || !subcommand.flags) return process.exit(0);
 		return resolveCompletions(subcommand.flags.map(r=> r.name), now);
 	} catch (_){
-		log(".bsrc has probably invalid json scheme");
+		log("Completion script in .bsrc has probably invalid json scheme, see https://github.com/fvictorio/completely");
 		return process.exit(1);
 	}
 }
