@@ -1,6 +1,6 @@
 {
 	"name": "@jaandrle/bs",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "The simplest possible build system using executable/bash scripts",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
