@@ -37,10 +37,13 @@ function completionBash({ api, completionScript, ls }, [ level, now= "", prev, f
 	try {
 		const { subcommands }= completionScript(first); // TODO: https://github.com/fvictorio/completely
 		if(!subcommands || !subcommands.length) return process.exit(0);
+		const only_one= subcommands.length === 1;
+		if(only_one && !subcommands[0].name) // cli supports only one subcommand
+			level+= 1;
 		if(!level)
 			return resolveCompletions(subcommands.flatMap(r=> r.command), now);
 
-		const subcommand= subcommands.length === 1 ? subcommands[0] : subcommands.find(r=> r.command===second);
+		const subcommand= only_one ? subcommands[0] : subcommands.find(r=> r.command===second);
 		if(!subcommand || !subcommand.flags) return process.exit(0);
 		return resolveCompletions(subcommand.flags.map(r=> r.name), now);
 	} catch (_){

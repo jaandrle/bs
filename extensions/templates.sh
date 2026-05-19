@@ -126,7 +126,7 @@ if [[ -z "$template" ]]; then
 elif [[  "$name" == "$template" || "skeleton/njs" == "$template" ]]; then
 	code <<'JAVASCRIPT'
 		#!/usr/bin/env -S npx nodejsscript
-		#/* global echo, $, pipe, s, fetch */
+		/* global echo, $, pipe, s, fetch */
 
 		echo("Hello world!");
 JAVASCRIPT
