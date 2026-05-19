@@ -8,7 +8,10 @@
  * ```
  * @param {...(i: any)=> any} fs
  * */
-const pipe= (...fs)=> input=> fs.reduce((out, f)=> f(out), input);
+const pipe =
+	(...fs) =>
+	(input) =>
+		fs.reduce((out, f) => f(out), input);
 /**
  * For help, this utility rearange lines to have max `length` chars.
  *
@@ -19,48 +22,49 @@ const pipe= (...fs)=> input=> fs.reduce((out, f)=> f(out), input);
  * @param {number} length
  * @returns {(line: string)=> string}
  * */
-function linesToMaxLength(length= 65){
-	return line=> {
-		const words= line.split(' ');
-		let currentLine= '';
-		let j= 1;
+function linesToMaxLength(length = 65) {
+	return (line) => {
+		const words = line.split(" ");
+		let currentLine = "";
+		let j = 1;
 		for (let i = 0; i < words.length; i++) {
-			const word= words[i];
-			if(currentLine.length + word.length > length*j){
-				j+= 1;
-				currentLine+= "\n\t";
+			const word = words[i];
+			if (currentLine.length + word.length > length * j) {
+				j += 1;
+				currentLine += "\n\t";
 			}
-				currentLine+= word + ' ';
+			currentLine += word + " ";
 		}
 		return currentLine;
 	};
 }
 /** Proper pass of `--help`/`--version` for `.run` */
-function passBuildArgs(){
-	const { argv }= process;
-	const [ i2, i3 ]= argv.slice(2);
-	if(!i2) return argv;
-	if(i2.startsWith("-")) return argv;
-	if(i2.startsWith(".") && i2!==".run" && i2!==".completion") return argv;
-	if(( i2===".run" || i2===".completion" ) && ( !i3 || i3.startsWith("-") )) return argv;
-	if(i2===".completion") return argv.slice(0, 4);
-	return argv.map(l=> l==="--help" || l==="--version" ? "--$$$" : l);
+function passBuildArgs() {
+	const { argv } = process;
+	const [i2, i3] = argv.slice(2);
+	if (!i2) return argv;
+	if (i2.startsWith("-")) return argv;
+	if (i2.startsWith(".") && i2 !== ".run" && i2 !== ".completion") return argv;
+	if ((i2 === ".run" || i2 === ".completion") && (!i3 || i3.startsWith("-")))
+		return argv;
+	if (i2 === ".completion") return argv.slice(0, 4);
+	return argv.map((l) => (l === "--help" || l === "--version" ? "--$$$" : l));
 }
 
-const { readdirSync, statSync, existsSync, constants }= require("node:fs");
-function listExecutables(dir, level){
+const { readdirSync, statSync, existsSync, constants } = require("node:fs");
+function listExecutables(dir, level) {
 	const out = [];
 	if (!existsSync(dir)) return out;
 
-	const stack = [ { path: dir, level: 0 } ];
+	const stack = [{ path: dir, level: 0 }];
 
 	while (stack.length > 0) {
 		const { path, level } = stack.pop();
 
 		for (const file of readdirSync(path)) {
-			if (file.startsWith('.')) continue;
+			if (file.startsWith(".")) continue;
 
-			const file_path = path + '/' + file;
+			const file_path = path + "/" + file;
 			if (!existsSync(file_path)) continue;
 			const stats = statSync(file_path);
 
@@ -74,17 +78,19 @@ function listExecutables(dir, level){
 
 	return out;
 }
-function isExecutable(path){
-	try{
-		const stat= statSync(path);
+function isExecutable(path) {
+	try {
+		const stat = statSync(path);
 		return stat.isFile() && stat.mode & constants.S_IXUSR;
-	} catch(_){
+	} catch (_) {
 		return false;
 	}
 }
 
-module.exports= {
+module.exports = {
 	pipe,
-	linesToMaxLength, passBuildArgs,
-	isExecutable, listExecutables
+	linesToMaxLength,
+	passBuildArgs,
+	isExecutable,
+	listExecutables,
 };
