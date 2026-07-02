@@ -39,8 +39,7 @@ function linesToMaxLength(length = 65) {
 	};
 }
 /** Proper pass of `--help`/`--version` for `.run` */
-function passBuildArgs() {
-	const { argv } = process;
+function passBuildArgs(argv) {
 	const [i2, i3] = argv.slice(2);
 	if (!i2) return argv;
 	if (i2.startsWith("-")) return argv;

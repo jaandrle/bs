@@ -1,8 +1,23 @@
 const { existsSync } = require("node:fs");
-const { cwd: pwd, exit } = require("node:process");
+const { cwd, exit } = require("node:process");
 const { log } = require("css-in-console");
 const { css, info } = require("./consts.js");
 const { join } = require("node:path");
+
+function cwdInConfig() {
+	const config = folderGlobalConfig(true);
+	return join(config, "my", cwd());
+}
+let islocal = true;
+function pwd() {
+	return islocal ? cwd() : cwdInConfig();
+}
+function processArgsLocation(argv) {
+	const a2 = argv[2];
+	if (a2 !== ".my") return argv;
+	islocal = false;
+	return argv.slice(0, 2).concat(argv.slice(3));
+}
 
 let folder_root;
 function folderRoot(required = false) {
@@ -46,4 +61,30 @@ function folderConfig(required = false) {
 	return (folder_config = candidate);
 }
 
-module.exports = { folderRoot, folderConfig, config_name };
+const { homedir, platform } = require("node:os");
+const global_config = join(homedir(), platform() === "win32" ? "AppData" : ".config", info.name+"rc");
+let folder_global_config;
+function folderGlobalConfig(required = false) {
+	if (folder_global_config) return folder_global_config;
+	const candidate = global_config;
+	if (!candidate || !existsSync(candidate)) {
+		if (required) {
+			log(
+				`%cNo global config folder: %c%s`,
+				css.error,
+				css.unset,
+				candidate
+			);
+			return exit(1);
+		}
+		return null;
+	}
+	return (folder_global_config = candidate);
+}
+
+function bsEchoHome() {
+	if (islocal) return [homedir(), "~"];
+	return [join(folderGlobalConfig(), "my", homedir()), "MY"];
+}
+
+module.exports = { folderRoot, folderConfig, processArgsLocation, pwd, bsEchoHome, config_name };

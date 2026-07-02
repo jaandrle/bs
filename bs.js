@@ -10,16 +10,15 @@ const // global functions/utils
 		statSync,
 		fstatSync,
 	} = require("node:fs"),
-	{ homedir } = require("node:os"),
 	{ join, relative } = require("node:path"),
-	{ stdout, argv, exit, cwd: pwd, chdir, kill, pid } = require("node:process"),
+	{ stdout, argv: argvOrig, exit, chdir, kill, pid } = require("node:process"),
 	{
 		pipe,
 		passBuildArgs,
 		listExecutables,
 		isExecutable,
 	} = require("./src/utils.js"),
-	{ folderRoot, folderConfig } = require("./src/find-bs.js");
+	{ folderRoot, folderConfig, processArgsLocation, pwd, bsEchoHome } = require("./src/find-bs.js");
 const stdoutIsFIFO = (() => {
 	try {
 		return fstatSync(stdout.fd).isFIFO();
@@ -31,9 +30,9 @@ const { css, fc, chars, info, help } = require("./src/consts.js");
 function logHead(wd_bs) {
 	if (stdoutIsFIFO) return;
 	let wd = join(wd_bs, "../");
-	const h = homedir();
+	const [h, hm] = bsEchoHome();
 	if (wd.startsWith(h))
-		wd = join(format("%c~", css.lowpriority), wd.slice(h.length));
+		wd = join(format("%c"+hm, css.lowpriority), wd.slice(h.length));
 	return log("%c%s%c%s", css.cwd, css.lowpriority, wd, join(info.name, "./"));
 }
 const api = require("sade")(info.name)
@@ -89,7 +88,9 @@ const api = require("sade")(info.name)
 
 	.command(".completion <shell>", help.completion)
 	.action(completion);
-api.parse(passBuildArgs());
+
+const argv= processArgsLocation(argvOrig);
+api.parse(passBuildArgs(argv));
 
 /** @returns {{ content: string[], found: { [script: string]: number }, path: string, exists: boolean, h_level: number }} */
 function readReadme(path_bs) {
@@ -127,7 +128,7 @@ function readReadme(path_bs) {
 function init(root = pwd()) {
 	const is_init = argv.slice(2)[0] === ".mkdir";
 	const folder_root_local = is_init ? join(root, info.name) : folderRoot();
-	if (!existsSync(folder_root_local)) mkdirSync(folder_root_local);
+	if (!existsSync(folder_root_local)) mkdirSync(folder_root_local, { recursive: is_init });
 	log("%cFolder:", css.highlight, folder_root_local);
 	const readme = readReadme(folder_root_local);
 	const execs = listExecutables(folder_root_local, 0).map((e) =>

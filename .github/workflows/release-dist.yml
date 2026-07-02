@@ -5,6 +5,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -15,6 +18,7 @@ jobs:
       with:
         node-version: '18.x'
         cache: 'npm'
+        package-manager-cache: false  # never use caching in release builds
     - run: npm ci
     - run: bs/build dist
     - uses: AButler/upload-release-assets@3d6774fae0ed91407dc5ae29d576b166536d1777 # v3.0
