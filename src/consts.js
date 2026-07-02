@@ -83,6 +83,7 @@ const help = !process.argv.includes("--help")
 				"To allow completions:",
 				`Just add ${fc`eval "$(${name} .completion bash)"`} to your ${fc`.bashrc`}`,
 			],
+			my: format("This is %cprefix%c to use local (“my”) commands stored in your global config folder.", css.highlight),
 		};
 
 module.exports = {

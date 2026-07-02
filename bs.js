@@ -76,6 +76,12 @@ const api = require("sade")(info.name)
 		return exit(0);
 	})
 
+	.command(".my", help.my)
+	.action(function my({ _: param}) {
+		if (".path"===param[0])
+			return console.log(bspwd());
+	})
+
 	.command(".mkdir [root]", help.mkdir)
 	.action(init)
 

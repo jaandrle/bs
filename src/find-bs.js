@@ -13,9 +13,10 @@ function bspwd() {
 	return islocal ? cwd() : cwdInConfig();
 }
 function processArgsLocation(argv) {
-	const a2 = argv[2];
+	const [a2, a3] = argv.slice(2);
 	if (a2 !== ".my") return argv;
 	islocal = false;
+	if (["--help", "--version", ".path"].includes(a3)) return argv;
 	return argv.slice(0, 2).concat(argv.slice(3));
 }
 
