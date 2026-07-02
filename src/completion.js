@@ -23,10 +23,18 @@ function completionBash(
 	const options_global = api.tree.__all__.options
 		.map((r) => r[0])
 		.concat("--help", "--version");
+	const ismy= first === ".my";
+	if (ismy) {
+		first = second;
+		second = third;
+		level -= 1;
+		const { processArgsLocation } = require("./find-bs.js");
+		processArgsLocation([null, null, ".my"]);
+	}
 	if (!level) {
 		if (now.startsWith("."))
 			return resolveCompletions(
-				Object.keys(api.tree).filter((c) => !c.startsWith("__")),
+				Object.keys(api.tree).filter((c) => !c.startsWith("__")).concat(ismy ? [] : [".my"]),
 				now,
 			);
 		if (now.startsWith("-")) return resolveCompletions(options_global, now);

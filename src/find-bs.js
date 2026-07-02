@@ -9,7 +9,7 @@ function cwdInConfig() {
 	return join(config, "my", cwd());
 }
 let islocal = true;
-function pwd() {
+function bspwd() {
 	return islocal ? cwd() : cwdInConfig();
 }
 function processArgsLocation(argv) {
@@ -27,13 +27,13 @@ function folderRoot(required = false) {
 			`%cNo \`${info.name}\` folder in current directory: %c%s`,
 			css.error,
 			css.unset,
-			pwd(),
+			bspwd(),
 		);
 		return exit(1);
 	}
 	return folder_root;
 }
-function findBSRaw(candidate = pwd()) {
+function findBSRaw(candidate = bspwd()) {
 	while (!existsSync(join(candidate, info.name))) {
 		const parent = join(candidate, "..");
 		if (parent === candidate) return null;
@@ -52,7 +52,7 @@ function folderConfig(required = false) {
 				`%cNo \`${config_name}\` folder in current bs: %c%s`,
 				css.error,
 				css.unset,
-				pwd(),
+				bspwd(),
 			);
 			return exit(1);
 		}
@@ -87,4 +87,10 @@ function bsEchoHome() {
 	return [join(folderGlobalConfig(), "my", homedir()), "MY"];
 }
 
-module.exports = { folderRoot, folderConfig, processArgsLocation, pwd, bsEchoHome, config_name };
+function pwd(){
+	const root= join(folderRoot(true), "..");
+	if(islocal) return root;
+	return root.slice(join(folderGlobalConfig(true), "my").length);
+}
+
+module.exports = { folderRoot, folderConfig, processArgsLocation, pwd, bspwd, bsEchoHome, config_name };

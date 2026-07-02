@@ -11,14 +11,14 @@ const // global functions/utils
 		fstatSync,
 	} = require("node:fs"),
 	{ join, relative } = require("node:path"),
-	{ stdout, argv: argvOrig, exit, chdir, kill, pid } = require("node:process"),
+	{ stdout, argv: argvOrig, exit, chdir, kill, pid, cwd } = require("node:process"),
 	{
 		pipe,
 		passBuildArgs,
 		listExecutables,
 		isExecutable,
 	} = require("./src/utils.js"),
-	{ folderRoot, folderConfig, processArgsLocation, pwd, bsEchoHome } = require("./src/find-bs.js");
+	{ folderRoot, folderConfig, processArgsLocation, bspwd, pwd, bsEchoHome } = require("./src/find-bs.js");
 const stdoutIsFIFO = (() => {
 	try {
 		return fstatSync(stdout.fd).isFIFO();
@@ -52,7 +52,7 @@ const api = require("sade")(info.name)
 					"%cNo `bs` for current directory: %c%s.",
 					css.error,
 					css.unset,
-					pwd(),
+					bspwd(),
 				);
 				log("You may want to run %cbs .mkdir%c.", css.code);
 			} else log("No executables found in '%s'.", folder_root);
@@ -125,7 +125,7 @@ function readReadme(path_bs) {
 	return { path, exists, content, found: Object.fromEntries(found), h_level };
 }
 
-function init(root = pwd()) {
+function init(root = bspwd()) {
 	const is_init = argv.slice(2)[0] === ".mkdir";
 	const folder_root_local = is_init ? join(root, info.name) : folderRoot();
 	if (!existsSync(folder_root_local)) mkdirSync(folder_root_local, { recursive: is_init });
@@ -236,21 +236,21 @@ function run(script) {
 	if (args[0] === ".run") args.shift();
 	if (!args.length) return api.tree[".ls"].handler();
 	else args.shift();
-	const wd_current = pwd();
-	const wd_root = join(folder_root, "..");
-	chdir(wd_root);
-	script = `${info.name}/${script}`;
-	if (!existsSync(script) || !statSync(script).isFile()) {
+	const wd_current = cwd();
+	const bswd_root = join(folder_root, "..");
+	chdir(bswd_root);
+	const script_bs = `${info.name}/${script}`;
+	if (!existsSync(script_bs) || !statSync(script_bs).isFile()) {
 		const candidate = listExecutables(
-			script.slice(0, script.lastIndexOf("/")),
+			script_bs.slice(0, script_bs.lastIndexOf("/")),
 			0,
-		).find((f) => f.startsWith(script) && f[script.length] === ".");
-		if (candidate) script = candidate;
+		).find((f) => f.startsWith(script_bs) && f[script_bs.length] === ".");
+		if (candidate) script_bs = candidate;
 	}
 	if (!stdoutIsFIFO) logHead(folder_root);
-	if (!isExecutable(script)) {
-		log(`%c'${script}' doesn't exist or is not executable.`, css.error);
-		const found = ls().filter((f) => f.script.includes(script.slice(3)));
+	if (!isExecutable(script_bs)) {
+		log(`%c'${script_bs}' doesn't exist or is not executable.`, css.error);
+		const found = ls().filter((f) => f.script.includes(script_bs.slice(3)));
 		if (found.length) {
 			log("\nYou may want to run:");
 			found.forEach(lsPrintNth);
@@ -258,10 +258,12 @@ function run(script) {
 		return exit(1);
 	}
 
-	if (!stdoutIsFIFO) lsPrintNth({ script: script.slice(info.name.length + 1) });
+	if (!stdoutIsFIFO) lsPrintNth({ script });
+	const wd_root = pwd();
+	chdir(wd_root);
 	const { spawn } = require("node:child_process");
 	return spawn(
-		script,
+		join(folder_root, script),
 		args.map((a) =>
 			["./", "../"].find((p) => a.startsWith(p))
 				? relative(wd_root, join(wd_current, a))
